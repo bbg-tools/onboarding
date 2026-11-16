@@ -246,6 +246,35 @@ button.b.ghost{background:#fff;color:var(--text);border-color:var(--line)}
 #toast{border-radius:980px;padding:11px 20px;background:rgba(29,29,31,.92);backdrop-filter:blur(10px)}
 @media(max-width:1049px){.actionbar{padding:8px 10px}.ab-btn{padding:9px 13px;font-size:13px}.ab-warn{padding:9px 12px;font-size:13px}.wrap{padding:12px}}
 </style>
+<style>
+/* ===== Pastell-Akzente ===== */
+body{background:radial-gradient(1200px 500px at 0% 0%,#eaf3ff 0%,rgba(234,243,255,0) 60%),radial-gradient(900px 500px at 100% 0%,#f3ecff 0%,rgba(243,236,255,0) 60%),radial-gradient(900px 600px at 50% 100%,#e9f8ef 0%,rgba(233,248,239,0) 60%),#f5f5f7;background-attachment:fixed}
+.hero h2{background:linear-gradient(90deg,#2a6cc0 0%,#6a4fc9 45%,#c23b67 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+header.top .logo{background:linear-gradient(135deg,#ffd60a,#ff9f0a 60%,#ff6b8b)}
+fieldset>legend{background:linear-gradient(90deg,var(--sec-bg) 0%,rgba(255,255,255,0) 85%)}
+fieldset>legend .ico,.secnav .ico{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--sec-bg);font-size:16px;flex:none}
+.secnav .ico{width:26px;height:26px;border-radius:8px;font-size:14px}
+fieldset>legend .ico{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+fieldset>legend .lg-t{color:var(--text)}
+fieldset.active{box-shadow:0 0 0 2px var(--sec-fg),0 6px 20px rgba(0,0,0,.06)}
+fieldset .chip.on{background:var(--sec-fg);border-color:var(--sec-fg);color:#fff}
+fieldset .chip:hover{border-color:var(--sec-fg)}
+fieldset .chk input{accent-color:var(--sec-fg)}
+fieldset input:focus,fieldset textarea:focus{border-color:var(--sec-fg);box-shadow:0 0 0 4px color-mix(in srgb,var(--sec-fg) 18%,transparent)}
+fieldset .info{background:var(--sec-bg);color:var(--sec-fg)}
+fieldset .photo{border-color:color-mix(in srgb,var(--sec-fg) 35%,#fff);background:color-mix(in srgb,var(--sec-bg) 40%,#fff)}
+.secnav button.cur{background:var(--sec-bg);box-shadow:none;font-weight:600}
+.secnav button:hover{background:color-mix(in srgb,var(--sec-bg) 70%,transparent)}
+@media(max-width:1049px){.secnav button{background:#fff}.secnav button.cur{background:var(--sec-bg)}}
+.right .card{box-shadow:0 2px 12px rgba(0,0,0,.05);border-top:4px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,#8fc1ff,#b9a6ff,#ffa8c2) border-box}
+.subject{background:#eef5ff;color:#1d3d66}
+.ab-btn{background:linear-gradient(90deg,#0071e3,#5b5bd6);border-color:transparent}
+.ab-btn:hover{background:linear-gradient(90deg,#0077ed,#6a6ae0)}
+.ab-btn.sec{background:#fff;border-color:#0071e3}
+.ab-warn{background:#dff5e8;color:#23874f}
+.ab-warn.has{background:#ffe9da;color:#b45616}
+.badge{background:#ffe9da;color:#b45616}
+</style>
 </head>
 <body>
 <header class="top">
@@ -1077,6 +1106,21 @@ $('f').addEventListener('change',update);
 update();
 </script>
 <script>
+/* ===== Pastellfarben je Abschnitt ===== */
+(function(){
+  const P=[['#dff5e8','#23874f'],['#dcecff','#2a6cc0'],['#ece6ff','#6a4fc9'],['#ffe9da','#c2611f'],['#fff3c4','#9a7400'],['#ffe1ea','#c23b67'],
+           ['#d8f4f4','#16807f'],['#f2e3ff','#9447c0'],['#e6f0db','#56782f'],['#ffe2de','#c4473b'],['#e2e8f2','#45597a'],['#fbe7f6','#a8428e']];
+  document.querySelectorAll('#f > fieldset').forEach((fs,i)=>{
+    const [bg,fg]=P[i%P.length];
+    const pal=`--sec-bg:${bg};--sec-fg:${fg}`;
+    fs.style.cssText+=';'+pal;fs.dataset.pal=pal;
+    const lg=fs.querySelector('legend');const t=lg.firstChild;
+    if(t&&t.nodeType===3){const m=t.textContent.trim().match(/^(\S+)\s+(.*)$/);
+      if(m){lg.textContent='';lg.insertAdjacentHTML('beforeend',`<span class="ico">${m[1]}</span> <span class="lg-t">${m[2]}</span>`);}}
+  });
+})();
+</script>
+<script>
 /* ===== Bedienung: Chips, Abschnitte, Navigation, Aktionsleiste, Zwischenspeicher ===== */
 (function(){
 const form=$('f');
@@ -1128,7 +1172,7 @@ function paint(){
     const n=fs._wre?warns.filter(w=>fs._wre.test(w)).length:0;
     const b=document.createElement('button');b.type='button';
     b.className=(n?'miss':(visited.has(fs.id)?'ok':''))+(fs===cur?' cur':'');
-    b.innerHTML=`<span class="st">${n?n:(visited.has(fs.id)?'✓':'')}</span>${fs.dataset.icon} ${esc(fs.dataset.name)}`;
+    b.innerHTML=`<span class="st">${n?n:(visited.has(fs.id)?'✓':'')}</span><span class="ico">${fs.dataset.icon}</span>${esc(fs.dataset.name)}`;b.style.cssText=fs.dataset.pal||'';
     b.onclick=()=>goTo(fs);nav.appendChild(b);
     fs.querySelector('.lg-sum').innerHTML=(n?`<span class="badge">${n} offen</span> `:'')+(fs.classList.contains('collapsed')?'Standard übernommen · aufklappen':'');
   });
