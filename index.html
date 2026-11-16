@@ -448,7 +448,7 @@ fieldset .photo{border-color:color-mix(in srgb,var(--sec-fg) 35%,#fff);backgroun
     <input type="text" id="znr" placeholder="z. B. 1ESY1160123456">
     <label for="zweitere">Weitere Zähler im Haus (optional)</label>
     <input type="text" id="zweitere" placeholder="z. B. Wärmepumpenzähler – bleibt unverändert">
-    <div class="hint">Ab 2 Zählern braucht es eine schriftliche Bestätigung des Kunden – kommt automatisch in die To-dos.</div>
+    <div class="hint">Ab 2 Zählern braucht es eine schriftliche Bestätigung des Kunden – kommt automatisch in die To-Do’s.</div>
     <label class="chk"><input type="checkbox" id="zzHinweis" checked> Hinweis: keine Zählerzusammenlegung</label>
     <label class="chk"><input type="checkbox" id="turnus" checked> Hinweis: angekündigten Turnustausch melden</label>
     <div class="photo" data-key="zaehler" data-label="Zaehler"></div>
@@ -521,7 +521,7 @@ fieldset .photo{border-color:color-mix(in srgb,var(--sec-fg) 35%,#fff);backgroun
     <label for="lager">Gewünschter Abstellort des Kunden (optional)</label>
     <input type="text" id="lager" placeholder="z. B. Einfahrt vor der Garage">
     <div class="hint">Geliefert wird bis zur Bordsteinkante. Den Wunschort geben wir weiter – der Lieferant entscheidet vor Ort.</div>
-    <label class="chk"><input type="checkbox" id="abstell"> Kunde bei Lieferung nicht da – Abstellgenehmigung zurücksenden (kommt als To-do)</label>
+    <label class="chk"><input type="checkbox" id="abstell"> Kunde bei Lieferung nicht da – Abstellgenehmigung zurücksenden (kommt als To-Do)</label>
   </fieldset>
 
   <fieldset>
@@ -544,7 +544,7 @@ fieldset .photo{border-color:color-mix(in srgb,var(--sec-fg) 35%,#fff);backgroun
     <legend>📝 Sonstiges</legend>
     <label for="notizen">Weitere Absprachen (eine pro Zeile)</label>
     <textarea id="notizen"></textarea>
-    <label for="todosExtra">Zusätzliche To-dos für den Kunden (eine pro Zeile)</label>
+    <label for="todosExtra">Zusätzliche To-Do’s für den Kunden (eine pro Zeile)</label>
     <textarea id="todosExtra"></textarea>
   </fieldset>
 
@@ -642,7 +642,7 @@ $('zanz').addEventListener('input',()=>{$('zanz').dataset.manual=$('zanz').value
 
 /* ---------- Mail-Inhalt ---------- */
 function subject(){
-  return "ENPAL | Montagevorbereitung: Ihre To-Do's & Zusammenfassung"+(v('projnr')?' – '+v('projnr'):'');
+  return "ENPAL | Montagevorbereitung: Ihre To-Do’s & Zusammenfassung"+(v('projnr')?' – '+v('projnr'):'');
 }
 function joinList(a){return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' und '+a[a.length-1];}
 const DEPTH_TXT={30:'30 cm direkt am Gebäude bzw. an der Garage',60:'60 cm im Garten',80:'80 cm unter befahrenen Wegen und Einfahrten'};
@@ -883,7 +883,7 @@ function greeting(){
 }
 function intro(){
   const g=v('gdatum');
-  return `vielen Dank für das angenehme Gespräch${g?' am '+fd(g):''}. Damit die Installation Ihrer Anlage reibungslos, sicher und ohne Verzögerungen abläuft, finden Sie direkt hier Ihre To-dos und Termine – darunter alle besprochenen Punkte im Detail.`;
+  return `vielen Dank für das angenehme Gespräch${g?' am '+fd(g):''}. Damit die Installation Ihrer Anlage reibungslos, sicher und ohne Verzögerungen abläuft, finden Sie direkt hier Ihre To-Do’s und Termine – darunter alle besprochenen Punkte im Detail.`;
 }
 const FOTO_HINWEIS='Falls Fotos aktuell nicht möglich sind, reicht eine kurze schriftliche Bestätigung völlig aus.';
 function widerspruch(){
@@ -915,7 +915,7 @@ function mailHtml(withPhotos=true){
 
   // To-dos ganz oben
   if(todos.length){
-    let t=`<p data-sec="todos" style="margin:0 0 6px;font-size:16px;color:${C.orange}"><b>📝 Ihre To-dos bis zur Montage</b></p>`;
+    let t=`<p data-sec="todos" style="margin:0 0 6px;font-size:16px;color:${C.orange}"><b>📝 Ihre To-Do’s bis zur Montage</b></p>`;
     t+=`<ol style="margin:0 0 6px;padding-left:22px">`+todos.map(x=>`<li style="margin:0 0 4px">${esc(x)}</li>`).join('')+'</ol>';
     t+=`<p style="margin:6px 0 0;font-size:12px;color:${C.muted}">${esc(FOTO_HINWEIS)} Antworten Sie dafür einfach auf diese E-Mail.</p>`;
     h+=boxHtml(t,C.orangeSoft,C.orange);
@@ -948,7 +948,7 @@ function mailText(){
   const line='────────────────────────────';
   let t=greeting()+'\n\n'+intro()+'\n';
   if(todos.length){
-    t+=`\n${line}\n📝 IHRE TO-DOS BIS ZUR MONTAGE\n${line}\n`;
+    t+=`\n${line}\n📝 IHRE TO-DO’S BIS ZUR MONTAGE\n${line}\n`;
     todos.forEach((x,i)=>t+=`${i+1}. ${x}\n`);
     t+=FOTO_HINWEIS+'\n';
   }
