@@ -357,6 +357,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const fd=d=>{if(!d)return'';const[y,m,t]=d.split('-');return `${t}.${m}.${y}`;};
 const lines=id=>v(id).split('\n').map(s=>s.trim()).filter(Boolean);
 const minusDays=(d,n)=>{if(!d)return'';const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-n);return fd(x.toISOString().slice(0,10));};
+const BCC='jonas.haag@enpal.de'; // Teamleiter automatisch in BCC
 const photos={};
 const storno=()=>v('oel')==='storno';
 const vd=id=>storno()?'':v(id);
@@ -796,7 +797,7 @@ $('bText').onclick=async()=>toast(await copyPlain(curText())?'Text kopiert':'Kop
 $('bSubj').onclick=async()=>toast(await copyPlain(subject())?'Betreff kopiert':'Kopieren fehlgeschlagen');
 $('bOutlook').onclick=async()=>{
   await copyRich();
-  location.href='mailto:'+encodeURIComponent(v('kmail'))+'?subject='+encodeURIComponent(subject());
+  location.href='mailto:'+encodeURIComponent(v('kmail'))+'?bcc='+encodeURIComponent(BCC)+'&subject='+encodeURIComponent(subject());
   toast('Mail kopiert – im neuen Fenster mit Strg+V einfügen');
 };
 $('bDl').onclick=()=>{
@@ -820,6 +821,7 @@ function buildEml(){
   const B='----=_ONB_'+Date.now();
   let e='';
   if(v('kmail'))e+='To: '+v('kmail')+'\r\n';
+  e+='Bcc: '+BCC+'\r\n';
   e+='Subject: =?UTF-8?B?'+b64(subject())+'?=\r\n';
   e+='X-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: multipart/related; boundary="'+B+'"\r\n\r\n';
   e+='--'+B+'\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\n\r\n'+wrap76(b64(html))+'\r\n';
