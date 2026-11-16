@@ -104,6 +104,7 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
       <label for="acdatum">AC – Elektroanschluss</label><input type="date" id="acdatum"><label class="chk2"><input type="checkbox" id="acdatum_2t" data-day2="acdatum2"> 2 Tage</label><input type="date" id="acdatum2" class="d2" disabled>
       <label for="medatum">ME – Zählertausch</label><input type="date" id="medatum"><label class="chk2"><input type="checkbox" id="medatum_2t" data-day2="medatum2"> 2 Tage</label><input type="date" id="medatum2" class="d2" disabled>
     </div>
+    <label class="chk"><input type="checkbox" id="acmKF"> ACM-Termin wird zur <b>Klärfahrt</b> umgebucht (z. B. Aufstellort noch unklar)</label>
     <div class="hint">Leere Felder erscheinen nicht in der Mail. Bei „2 Tage“ wird automatisch der nächste Werktag vorgeschlagen – bei Bedarf anpassen.</div>
   </fieldset>
 
@@ -130,10 +131,16 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
       <option value="fassade">Außen an der Fassade (graues Leerrohr)</option>
       <option value="schacht">Innen – vorhandener Schacht</option>
       <option value="schornstein">Innen – Schornstein</option>
+      <option value="dachboden">Innen – über den Dachboden</option>
     </select>
     <div id="schornInfo" class="info hidden">Nur Schornstein <b>ohne Feuerstelle</b>. Schornsteinfeger-Bestätigung spätestens 2 Tage vor DC – Kosten trägt der Kunde.</div>
     <label for="kabeldetail">Details (Fassadenseite, Einführung, Kabelweg innen …)</label>
     <input type="text" id="kabeldetail" placeholder="z. B. Gartenseite am Fallrohr, Einführung neben Kellerfenster">
+    <label for="aoZs">Kabelweg Aufstellort → Zählerschrank</label>
+    <select id="aoZs">
+      <option value="innen">Innen (Standard)</option>
+      <option value="aussen">Außen über die Fassade – auf Kundenwunsch (zusätzliche Leerrohre)</option>
+    </select>
     <div class="hint">Kabelwege nie fest zusagen – der Monteur entscheidet vor Ort (steht so auch in der Mail).</div>
     <label for="strErd">Erdarbeiten für PV-Strings notwendig?</label>
     <select id="strErd"><option value="nein">Nein</option><option value="ja">Ja – bauseits durch Kunden</option></select>
@@ -161,6 +168,17 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
     </div>
     <label for="aortDetail">Genaue Position</label>
     <input type="text" id="aortDetail" placeholder="z. B. linke Wand neben der Heizung">
+    <label for="frost">Frostsicherheit Aufstellort</label>
+    <select id="frost">
+      <option value="ok">Aufstellort ist frostsicher (Standard)</option>
+      <option value="unsicher">Unsicher – Kunde muss isolieren bzw. Nachweis schicken</option>
+    </select>
+    <label for="oel">Öltanks</label>
+    <select id="oel">
+      <option value="">Keine Öltanks / nicht relevant</option>
+      <option value="ausbau">Öltanks werden bis zur Montage ausgebaut (Fotonachweis)</option>
+      <option value="storno">Montagetermine vorerst storniert – Öltanks nicht rechtzeitig raus</option>
+    </select>
     <label class="chk"><input type="checkbox" id="sockel"> Hochwassergefahr – Speicher-Sockel durch Kunden (4 Gehwegplatten o. Ä.)</label>
     <label class="chk"><input type="checkbox" id="holz"> Holzvertäfelung am Aufstellort</label>
     <div id="holzBox" class="hidden">
@@ -246,10 +264,15 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
       <div><label for="dach">Dacheindeckung</label>
         <select id="dach">
           <option value="ton">Tondachziegel</option><option value="beton">Betondachsteine</option>
-          <option value="blech">Blech-/Trapezdach</option><option value="schiefer">Schiefer</option><option value="sonst">Sonstiges</option>
+          <option value="blech">Blech-/Trapezdach</option><option value="flach">Flachdach</option><option value="schiefer">Schiefer</option><option value="sonst">Sonstiges</option>
         </select></div>
       <div><label for="zanz">Anzahl Ersatzziegel</label><input type="number" id="zanz" min="0"></div>
     </div>
+    <div class="row">
+      <div><label for="zName">Ziegel – Hersteller/Modell (optional)</label><input type="text" id="zName" placeholder="z. B. Braas Frankfurter Pfanne"></div>
+      <div><label for="zFarbe">Ziegel – Farbe (optional)</label><input type="text" id="zFarbe" placeholder="z. B. Granit, Ziegelrot"></div>
+    </div>
+    <label class="chk"><input type="checkbox" id="beta"> Montage mit Beta-Platte (SL Rack) – Aufklärung vom Kunden unterschrieben</label>
     <label class="chk"><input type="checkbox" id="bruechig"> Ziegel spröde/brüchig (100 % der Module)</label>
     <div class="hint" id="zHint">Automatisch: Beton 50 % der Module + 5 · Ton 75 % + 5 · brüchig 100 %. Manuell überschreibbar.</div>
     <label for="ziegel">Ersatzziegel</label>
@@ -335,6 +358,8 @@ const fd=d=>{if(!d)return'';const[y,m,t]=d.split('-');return `${t}.${m}.${y}`;};
 const lines=id=>v(id).split('\n').map(s=>s.trim()).filter(Boolean);
 const minusDays=(d,n)=>{if(!d)return'';const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-n);return fd(x.toISOString().slice(0,10));};
 const photos={};
+const storno=()=>v('oel')==='storno';
+const vd=id=>storno()?'':v(id);
 const day2=id=>c(id+'_2t')&&v(id+'2')?v(id+'2'):'';
 function nextWorkday(iso){const d=new Date(iso+'T12:00:00');do{d.setDate(d.getDate()+1);}while(d.getDay()===0||d.getDay()===6);return d.toISOString().slice(0,10);}
 const termStr=(d,d2)=>d2?fd(d)+' + '+fd(d2):fd(d);
@@ -407,27 +432,34 @@ function build(){
 
   // Termine
   const termine=[];
-  [['mstart','Dachmontage (DC)'],['acmdatum','Elektrovormontage (ACM)'],['acdatum','Elektroanschluss (AC)'],['medatum','Zählertausch (ME)']]
+  [['mstart','Dachmontage (DC)'],['acmdatum',c('acmKF')?'Elektrovormontage (ACM) – Klärfahrt':'Elektrovormontage (ACM)'],['acdatum','Elektroanschluss (AC)'],['medatum','Zählertausch (ME)']]
     .forEach(([id,l])=>{
-      if(!v(id))return;
+      if(!vd(id))return;
       const d2=day2(id);
       if(d2&&d2<=v(id))warns.push(l+': Tag 2 liegt nicht nach Tag 1');
       termine.push([v(id),l+(d2?' – 2 Tage':''),d2]);
     });
   termine.sort((x,y)=>x[0].localeCompare(y[0]));
-  if(!termine.length)warns.push('Kein Montagetermin eingetragen');
+  if(!termine.length&&!storno())warns.push('Kein Montagetermin eingetragen');
+  if(c('acmKF')&&!v('acmdatum'))warns.push('Klärfahrt angehakt, aber kein ACM-Termin eingetragen');
 
   // Kabelweg
   const kw=v('kabelweg'),kd=v('kabeldetail'),k=[];
   k.push('Wir verlegen ausschließlich auf Putz – außen in einem grauen, UV-beständigen Leerrohr und im Innenraum in weißen Aufputzkanälen. Eine Verlegung unter Putz führen wir grundsätzlich nicht durch.');
   if(kw==='fassade')k.push('Geplant ist, die DC- und AC-Kabel von den Modulen aus im Leerrohr an der Fassade entlang nach unten zu führen und anschließend ins Gebäude einzuführen'+(kd?' ('+kd+')':'')+'.');
+  else if(kw==='dachboden'){
+    k.push('Geplant ist, die DC- und AC-Kabel von den Modulen aus über den Dachboden ins Gebäude zu führen'+(kd?' ('+kd+')':'')+'.');
+    k.push('👉 Bitte machen Sie den Dachboden bis zum Montagetag zugänglich und räumen Sie den Bereich entlang des Kabelwegs frei.');
+    todos.push('Dachboden bis zum Montagetag zugänglich machen und entlang des Kabelwegs freiräumen');
+  }
   else if(kw==='schacht')k.push('Geplant ist, die DC- und AC-Kabel von den Modulen aus durch den vorhandenen Schacht ins Gebäude zu führen'+(kd?' ('+kd+')':'')+'.');
   else{
     k.push('Geplant ist, die DC- und AC-Kabel von den Modulen aus durch den Schornstein ins Gebäude zu führen'+(kd?' ('+kd+')':'')+'. Dies ist nur bei einem Schornstein ohne angeschlossene Feuerstelle möglich.');
-    k.push('👉 Dafür benötigen wir spätestens 2 Tage vor der Dachmontage (DC)'+(v('mstart')?', also bis zum '+minusDays(v('mstart'),2)+',':'')+' eine schriftliche Bestätigung Ihres Schornsteinfegers, dass die Kabel durch den Schornstein verlegt werden dürfen. Die Kosten hierfür tragen Sie. Liegt die Bestätigung nicht rechtzeitig vor, kann der Kabelweg über den Schornstein nicht umgesetzt werden.');
-    todos.push('Schornsteinfeger-Bestätigung für die Kabelverlegung durch den Schornstein'+(v('mstart')?' – spätestens bis '+minusDays(v('mstart'),2):' – spätestens 2 Tage vor der Dachmontage'));
-    if(!v('mstart'))warns.push('Schornstein: ohne DC-Termin keine Frist für die Schornsteinfeger-Bestätigung');
+    k.push('👉 Dafür benötigen wir spätestens 2 Tage vor der Dachmontage (DC)'+(vd('mstart')?', also bis zum '+minusDays(vd('mstart'),2)+',':'')+' eine schriftliche Bestätigung Ihres Schornsteinfegers, dass die Kabel durch den Schornstein verlegt werden dürfen. Die Kosten hierfür tragen Sie. Liegt die Bestätigung nicht rechtzeitig vor, kann der Kabelweg über den Schornstein nicht umgesetzt werden.');
+    todos.push('Schornsteinfeger-Bestätigung für die Kabelverlegung durch den Schornstein'+(vd('mstart')?' – spätestens bis '+minusDays(vd('mstart'),2):' – spätestens 2 Tage vor der Dachmontage'));
+    if(!vd('mstart')&&!storno())warns.push('Schornstein: ohne DC-Termin keine Frist für die Schornsteinfeger-Bestätigung');
   }
+  if(v('aoZs')==='aussen')k.push('Auf Ihren Wunsch werden die Leitungen vom Aufstellort zum Zählerschrank nicht durch das Haus, sondern außen über die Fassade geführt. Dafür werden zusätzliche Leerrohre an der Fassade verlegt.');
   k.push('Die Hausdurchführung wird fachgerecht mit Brunnenschaum abgedichtet. Bitte beachten Sie: Der endgültige Kabelweg wird vom Montageteam vor Ort festgelegt.');
   k.push('👉 Bitte halten Sie den vorgesehenen Bereich sowie mögliche Durchbruchstellen gut zugänglich, damit unser Montageteam ohne Umwege arbeiten kann.');
   if(v('strErd')==='ja'){
@@ -446,6 +478,21 @@ function build(){
     a.push('👉 Bitte stellen Sie sicher, dass der Bereich bis zum Montagetag vollständig freigeräumt ist und keine Gegenstände im direkten Arbeitsbereich stehen.');
     todos.push('Foto des freigeräumten Aufstellorts – alternativ eine kurze schriftliche Bestätigung, dass die Fläche bis zum Montagetag vollständig frei ist und dort keine Wasser- oder Gasleitungen verlaufen');
   }else a.push('Der Aufstellort ist bereits freigeräumt – vielen Dank!');
+  if(v('frost')==='unsicher'){
+    a.push('❄️ Der Aufstellort muss frostsicher sein'+(/Garage/.test(v('aort'))?' – gerade in einer Garage ist das wichtig':'')+'. Da dies aktuell noch nicht sicher ist, isolieren Sie den Aufstellort bitte bis zum Montagetag entsprechend.');
+    a.push('👉 Bitte senden Sie mir dazu bis zum Montagetag ein Foto oder eine kurze schriftliche Bestätigung, dass der Aufstellort frostsicher ist.');
+    todos.push('Aufstellort frostsicher machen (isolieren) und Foto oder schriftliche Bestätigung senden');
+  }else a.push('❄️ Der Aufstellort ist laut unserem Gespräch frostsicher.');
+  if(v('oel')==='ausbau'){
+    const f=['mstart','acmdatum','acdatum','medatum'].map(v).filter(Boolean).sort()[0];
+    a.push('🛢️ Die vorhandenen Öltanks müssen bis zur Montage vollständig ausgebaut sein.');
+    a.push('👉 Bitte senden Sie mir so früh wie möglich – spätestens in der Woche vor der Montage'+(f?' (erster Montagetermin: '+fd(f)+')':'')+' – ein Foto als Nachweis, dass die Öltanks entfernt wurden. Dieser Nachweis ist zwingend erforderlich.');
+    todos.push('Öltanks bis zur Montage ausbauen und Foto als Nachweis senden – so früh wie möglich, spätestens in der Woche vor der Montage');
+  }else if(v('oel')==='storno'){
+    a.push('🛢️ Da die vorhandenen Öltanks bis zum geplanten Montagetermin nicht ausgebaut sein werden, haben wir Ihre Montagetermine vorerst storniert.');
+    a.push('👉 Bitte melden Sie sich bei mir, sobald die Öltanks ausgebaut sind – gern mit einem Foto als Nachweis. Dann planen wir neue Termine für Ihre Montage.');
+    todos.push('Bescheid geben, sobald die Öltanks ausgebaut sind (mit Foto als Nachweis) – danach planen wir neue Montagetermine');
+  }
   if(c('sockel')){
     a.push('🌊 Da am Aufstellort Hochwassergefahr besteht, muss der Batteriespeicher erhöht auf einem Sockel stehen.');
     a.push('👉 Bitte stellen Sie bis zum Montagetag einen stabilen Sockel bereit – zum Beispiel aus vier Gehwegplatten oder einem anderen festen Podest. Sollte Ihnen das nicht möglich sein, geben Sie mir bitte frühzeitig Bescheid, dann versuchen wir, eine Lösung für Sie zu finden.');
@@ -539,9 +586,11 @@ function build(){
 
   // Dach
   const d=[],zi=v('ziegel'),dach=$('dach').selectedOptions[0].text,n=v('zanz');
-  if(zi==='nicht'||v('dach')==='blech')d.push('Dacheindeckung: '+dach+'. Ersatzziegel werden nicht benötigt.');
+  const noZiegel=zi==='nicht'||['blech','flach'].includes(v('dach'));
+  const zInfo=[v('zName'),v('zFarbe')?'Farbe '+v('zFarbe'):''].filter(Boolean).join(', ');
+  if(noZiegel)d.push('Dacheindeckung: '+dach+'. Ersatzziegel werden nicht benötigt.');
   else{
-    d.push('Bitte halten Sie für die Montage '+(n?'ca. '+n+' ':'')+'passende Ersatzziegel bzw. -steine vor Ort bereit.');
+    d.push('Bitte halten Sie für die Montage '+(n?'ca. '+n+' ':'')+'passende Ersatzziegel bzw. -steine vor Ort bereit.'+(zInfo?' Ihre aktuelle Dacheindeckung: '+zInfo+'.':''));
     d.push('So können wir eventuelle Vorschäden wie Haarrisse oder brüchige Ziegel direkt austauschen, während wir ohnehin auf Ihrem Dach sind. Das erspart Ihnen einen späteren Dachdecker-Einsatz und die damit verbundenen Kosten.');
     if(zi==='vorhanden')d.push('✔️ Laut unserem Gespräch sind ausreichend Ersatzziegel vorhanden.');
     if(zi==='besorgt'){d.push('👉 Sie organisieren die Ersatzziegel bis zum Montagetag.');todos.push('Ersatzziegel'+(n?' (ca. '+n+' Stück)':'')+' bis zum Montagetag besorgen');}
@@ -552,12 +601,13 @@ function build(){
     d.push('⚡ Ihre Blitzschutzanlage: Zu allen leitenden Teilen müssen mindestens 50 cm Abstand eingehalten werden – andernfalls muss die Blitzschutzanlage vollständig abgebaut werden (ein teilweiser Umbau ist nicht möglich). Die genaue Vorgehensweise stimme ich mit Ihnen ab; eine Demontage bestätigen Sie mir bitte schriftlich per E-Mail unter Angabe Ihrer Kundennummer.');
   }
   if(c('geruest'))d.push('🏗️ Für die Dachmontage wird ein Gerüst gestellt. Bitte halten Sie die Fläche rund ums Haus dafür frei.');
-  if(photos.ziegel&&photos.ziegel.length&&!(zi==='nicht'||v('dach')==='blech'))d.push('📷 Zur Orientierung finden Sie unten Fotos Ihrer aktuellen Dacheindeckung. Damit können Sie beim Baustoffhändler bzw. Dachdecker gezielt die passenden Ersatzziegel besorgen.');
+  if(c('beta'))d.push('🧩 Wie bereits mit Ihnen besprochen, kommt bei Ihrer Anlage die Beta-Platte von SL Rack zum Einsatz – ein Universal-Blechziegel, der an den nötigen Stellen anstelle einzelner Original-Dachziegel verbaut wird. Die Aufklärung dazu haben Sie bereits unterschrieben.');
+  if(photos.ziegel&&photos.ziegel.length&&!noZiegel)d.push('📷 Zur Orientierung finden Sie unten Fotos Ihrer aktuellen Dacheindeckung. Damit können Sie beim Baustoffhändler bzw. Dachdecker gezielt die passenden Ersatzziegel besorgen.');
   sec('🧱','Dach & Ersatzziegel',d,'ziegel');
 
   // Lieferung
   if(c('h_liefer')){
-    const first=['mstart','acmdatum','acdatum','medatum'].map(v).filter(Boolean).sort()[0];
+    const first=['mstart','acmdatum','acdatum','medatum'].map(vd).filter(Boolean).sort()[0];
     const amTag=v('lieferZeit')==='montagetag';
     const l=[amTag?'Ihr Material wird direkt am Montagetag'+(first?' ('+fd(first)+')':'')+' angeliefert.':'Das Material wird in der Regel 1–2 Werktage vor dem ersten Montagetermin'+(first?' ('+fd(first)+')':'')+' geliefert.'];
     l.push('Die Anlieferung erfolgt bis zur Bordsteinkante.'+(v('lager')?' Ihren Wunsch-Abstellort ('+v('lager')+') geben wir gern an den Lieferanten weiter. Dieser prüft vor Ort, ob das machbar ist, und entscheidet eigenständig.':' Einen Wunsch-Abstellort geben wir gern an den Lieferanten weiter – dieser prüft vor Ort die Machbarkeit und entscheidet eigenständig.'));
@@ -572,7 +622,7 @@ function build(){
 
   // Allgemein
   const g=[];
-  if(c('h_strom'))g.push('⚡ Am Termin für Elektroanschluss (AC) und Zählertausch (ME) wird am Hausanschluss gearbeitet. Der Strom ist dabei für ca. 2–4 Stunden abgeschaltet – bitte planen Sie dies ein (z. B. Homeoffice, Kühl- und Gefriergeräte geschlossen halten). Trennen Sie hochwertige oder empfindliche Elektrogeräte (z. B. TV, PC, Server, HiFi) vorsorglich vom Stromnetz. Die genaue Abstimmung erfolgt mit dem Elektriker vor Ort.'+(v('acdatum')?' Termin: '+termStr(v('acdatum'),day2('acdatum'))+'.':''));
+  if(c('h_strom'))g.push('⚡ Am Termin für Elektroanschluss (AC) und Zählertausch (ME) wird am Hausanschluss gearbeitet. Der Strom ist dabei für ca. 2–4 Stunden abgeschaltet – bitte planen Sie dies ein (z. B. Homeoffice, Kühl- und Gefriergeräte geschlossen halten). Trennen Sie hochwertige oder empfindliche Elektrogeräte (z. B. TV, PC, Server, HiFi) vorsorglich vom Stromnetz. Die genaue Abstimmung erfolgt mit dem Elektriker vor Ort.'+(vd('acdatum')?' Termin: '+termStr(vd('acdatum'),day2('acdatum'))+'.':''));
   if(c('h_gefahr'))g.push('🚧 Während der Dachmontage kann es zu herabfallendem Material kommen. Bitte räumen Sie den Bereich rund ums Haus frei – insbesondere Fahrzeuge, Gartenmöbel, Blumentöpfe sowie Deko- oder empfindliche Gegenstände.');
   if(c('h_zugang'))g.push('🔑 Bitte stellen Sie sicher, dass an den Montagetagen eine erwachsene Person vor Ort ist und unser Team Zugang zu Aufstellort, Zählerschrank, Hausanschlusskasten und ggf. Dachboden hat.');
   if(c('h_module'))g.push('📐 Die Modulbelegung kann sich vor Ort noch ändern (z. B. durch Ziegel, Sparren oder Dachfenster). Sollten dadurch Module entfallen, wird Ihr Vertrag entsprechend angepasst.');
@@ -698,7 +748,7 @@ function toggles(){
   $('zsNeuBox').classList.toggle('hidden',v('zsStatus')!=='zss');
   $('schornInfo').classList.toggle('hidden',v('kabelweg')!=='schornstein');
   $('refBox').classList.toggle('hidden',!c('h_ref'));
-  const noZ=v('ziegel')==='nicht'||v('dach')==='blech';
+  const noZ=v('ziegel')==='nicht'||['blech','flach'].includes(v('dach'));
   $('zanz').disabled=noZ;
   if(!$('zanz').dataset.manual)$('zanz').value=calcZiegel();
 }
