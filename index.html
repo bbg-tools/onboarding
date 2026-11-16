@@ -107,6 +107,9 @@ label{font-weight:500}
 /* Abschnitts-Navigation */
 .secnav{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 2px;margin:-4px 0 10px;background:var(--bg);scrollbar-width:thin}
 .secnav button{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer;color:var(--text);white-space:nowrap}
+.secnav .nav-title{display:none;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:2px 4px 2px}
+.secnav .nav-sum{font-size:12px;color:var(--muted);margin:6px 4px 0;display:none}
+@media(min-width:1050px){.secnav .nav-sum{display:block}}
 .secnav button .st{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;background:#e9edf1;color:var(--muted)}
 .secnav button.ok .st{background:var(--accent);color:#fff}
 .secnav button.miss .st{background:#f5a524;color:#fff}
@@ -139,7 +142,19 @@ label{font-weight:500}
 }
 fieldset{min-width:0}
 .wrap{grid-template-columns:minmax(0,1fr)}
-@media(min-width:1050px){.wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(min-width:1050px){
+  .wrap{grid-template-columns:200px minmax(0,1fr) minmax(0,1fr);max-width:1760px}
+  .secnav{position:sticky;top:16px;align-self:start;flex-direction:column;margin:0;padding:0;background:none;gap:6px;max-height:calc(100vh - 110px);overflow-x:visible;overflow-y:auto}
+  .secnav .nav-title{display:block}
+  .secnav button{width:100%;white-space:normal;text-align:left;padding:9px 11px;border-radius:11px;font-size:13.5px}
+  .secnav button .st{flex:none}
+}
+@media(min-width:1050px) and (max-width:1300px){.wrap{grid-template-columns:170px minmax(0,1fr) minmax(0,1fr);gap:14px;padding:14px}}
+.terms{grid-template-columns:minmax(92px,.8fr) minmax(0,1fr) auto minmax(0,1fr)}
+.terms label{font-weight:700;line-height:1.2}
+.terms label.chk2{font-weight:500}
+.terms label small{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.terms input[type=date]{min-width:0;padding:8px 6px}
 @media(max-width:560px){#abCopy,#abNew{display:none}.ab-right{flex-wrap:nowrap}.ab-warn{white-space:nowrap}.terms{grid-template-columns:1fr}.terms .th{display:none}}
 </style>
 </head>
@@ -158,8 +173,8 @@ fieldset{min-width:0}
 </header>
 
 <div class="wrap">
+<nav class="secnav" id="secnav" aria-label="Abschnitte"></nav>
 <form id="f" class="left" autocomplete="off" onsubmit="return false">
-  <nav class="secnav" id="secnav" aria-label="Abschnitte"></nav>
 
   <fieldset>
     <legend>👤 Kunde</legend>
@@ -185,10 +200,10 @@ fieldset{min-width:0}
     <legend>📅 Montagetermine</legend>
     <div class="terms">
       <div class="th">Gewerk</div><div class="th">Tag 1</div><div class="th"></div><div class="th">Tag 2</div>
-      <label for="mstart">DC – Dachmontage</label><input type="date" id="mstart"><label class="chk2"><input type="checkbox" id="mstart_2t" data-day2="mstart2"> 2 Tage</label><input type="date" id="mstart2" class="d2" disabled>
-      <label for="acmdatum">ACM – Elektrovormontage</label><input type="date" id="acmdatum"><label class="chk2"><input type="checkbox" id="acmdatum_2t" data-day2="acmdatum2"> 2 Tage</label><input type="date" id="acmdatum2" class="d2" disabled>
-      <label for="acdatum">AC – Elektroanschluss</label><input type="date" id="acdatum"><label class="chk2"><input type="checkbox" id="acdatum_2t" data-day2="acdatum2"> 2 Tage</label><input type="date" id="acdatum2" class="d2" disabled>
-      <label for="medatum">ME – Zählertausch</label><input type="date" id="medatum"><label class="chk2"><input type="checkbox" id="medatum_2t" data-day2="medatum2"> 2 Tage</label><input type="date" id="medatum2" class="d2" disabled>
+      <label for="mstart">DC<small>Dachmontage</small></label><input type="date" id="mstart"><label class="chk2"><input type="checkbox" id="mstart_2t" data-day2="mstart2"> 2 Tage</label><input type="date" id="mstart2" class="d2" disabled>
+      <label for="acmdatum">ACM<small>Elektrovormontage</small></label><input type="date" id="acmdatum"><label class="chk2"><input type="checkbox" id="acmdatum_2t" data-day2="acmdatum2"> 2 Tage</label><input type="date" id="acmdatum2" class="d2" disabled>
+      <label for="acdatum">AC<small>Elektroanschluss</small></label><input type="date" id="acdatum"><label class="chk2"><input type="checkbox" id="acdatum_2t" data-day2="acdatum2"> 2 Tage</label><input type="date" id="acdatum2" class="d2" disabled>
+      <label for="medatum">ME<small>Zählertausch</small></label><input type="date" id="medatum"><label class="chk2"><input type="checkbox" id="medatum_2t" data-day2="medatum2"> 2 Tage</label><input type="date" id="medatum2" class="d2" disabled>
     </div>
     <label class="chk"><input type="checkbox" id="acmKF"> ACM-Termin wird zur <b>Klärfahrt</b> umgebucht (z. B. Aufstellort noch unklar)</label>
     <div class="hint">Leere Felder erscheinen nicht in der Mail. Bei „2 Tage“ wird automatisch der nächste Werktag vorgeschlagen – bei Bedarf anpassen.</div>
@@ -1013,7 +1028,7 @@ const visited=new Set();
 function paint(){
   syncChips();
   const warns=build().warns;
-  const nav=$('secnav');nav.innerHTML='';
+  const nav=$('secnav');nav.innerHTML='<span class="nav-title">Abschnitte</span>';
   const cur=form.querySelector('fieldset.active');
   fss.forEach(fs=>{
     if(fs.classList.contains('hidden'))return;
@@ -1024,6 +1039,8 @@ function paint(){
     b.onclick=()=>goTo(fs);nav.appendChild(b);
     fs.querySelector('.lg-sum').innerHTML=(n?`<span class="badge">${n} offen</span> `:'')+(fs.classList.contains('collapsed')?'Standard übernommen · aufklappen':'');
   });
+  const done=nav.querySelectorAll('button.ok').length,tot=nav.querySelectorAll('button').length;
+  nav.insertAdjacentHTML('beforeend',`<div class="nav-sum">${warns.length?'⚠️ '+warns.length+' offen':'✓ Alles vollständig'} · ${done}/${tot} bearbeitet</div>`);
   const ab=$('abWarn');
   ab.classList.toggle('has',warns.length>0);
   ab.textContent=warns.length?`⚠️ ${warns.length} ${warns.length===1?'Punkt':'Punkte'} offen`:'✓ Alles vollständig';
