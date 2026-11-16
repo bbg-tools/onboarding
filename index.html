@@ -893,54 +893,80 @@ function widerspruch(){
 function fragen(){return 'Bei Fragen erreichen Sie mich jederzeit gerne – Mo–Fr von 08 bis 17 Uhr, gern auch per WhatsApp.';}
 
 /* Mail-Layout: Tabellen + Inline-Styles, damit es in Outlook sauber aussieht */
-const C={green:'#0b6e4f',greenSoft:'#eef6f2',orange:'#c77700',orangeSoft:'#fff4e0',grey:'#f4f6f8',line:'#dde3ea',text:'#1d2430',muted:'#5f6b7a'};
+const C={green:'#13795b',dark:'#0f3d2e',greenSoft:'#eef7f2',orange:'#b85c00',orangeSoft:'#fff6ea',orangeLine:'#f2a54a',grey:'#f6f7f9',line:'#e4e7eb',text:'#1f2933',muted:'#667085'};
+const TBL='role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;';
 function boxHtml(inner,bg,border){
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 18px"><tr><td style="background:${bg};border-left:4px solid ${border};padding:14px 16px">${inner}</td></tr></table>`;
+  return `<table ${TBL}margin:0 0 18px"><tr><td style="background:${bg};border-left:4px solid ${border};padding:16px 18px">${inner}</td></tr></table>`;
+}
+function callout(label,text,bg,border,col){
+  return `<table ${TBL}margin:6px 0 12px"><tr><td style="background:${bg};border-left:3px solid ${border};padding:10px 14px">`+
+    `<div style="font-size:11px;font-weight:bold;letter-spacing:.6px;text-transform:uppercase;color:${col};margin:0 0 3px">${label}</div>`+
+    `<div style="color:${C.text}">${esc(text)}</div></td></tr></table>`;
 }
 function paraHtml(p){
-  if(p.startsWith('👉'))return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:4px 0 10px"><tr><td style="background:${C.greenSoft};border-left:3px solid ${C.green};padding:8px 12px">${esc(p)}</td></tr></table>`;
-  if(p.startsWith('⚠️')||p.startsWith('📌'))return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:4px 0 10px"><tr><td style="background:${C.orangeSoft};border-left:3px solid ${C.orange};padding:8px 12px">${esc(p)}</td></tr></table>`;
-  return `<p style="margin:0 0 8px">${esc(p)}</p>`;
+  if(p.startsWith('👉'))return callout('Ihre Aufgabe',p.replace(/^👉\s*/,''),C.greenSoft,C.green,C.green);
+  if(p.startsWith('⚠️')||p.startsWith('📌'))return callout('Wichtig',p.replace(/^(⚠️|📌)\s*/,''),C.orangeSoft,C.orangeLine,C.orange);
+  return `<p style="margin:0 0 10px">${esc(p)}</p>`;
 }
 function parasHtml(ps){
   let h='',ul=[];
-  const flush=()=>{if(ul.length){h+='<ul style="margin:0 0 10px;padding-left:20px">'+ul.map(x=>`<li style="margin:0 0 3px">${esc(x)}</li>`).join('')+'</ul>';ul=[];}};
+  const flush=()=>{if(ul.length){h+='<ul style="margin:0 0 12px;padding-left:20px">'+ul.map(x=>`<li style="margin:0 0 4px">${esc(x)}</li>`).join('')+'</ul>';ul=[];}};
   ps.forEach(p=>{if(p.startsWith('• '))ul.push(p.slice(2));else{flush();h+=paraHtml(p);}});
   flush();return h;
 }
 function mailHtml(withPhotos=true){
   const {S,todos,termine}=build();
-  let h=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:${C.text};max-width:680px">`;
-  h+=`<p style="margin:0 0 10px">${esc(greeting())}</p><p style="margin:0 0 18px">${esc(intro())}</p>`;
+  const meta=[v('projnr')?'Kundennummer '+v('projnr'):'',v('gdatum')?'Onboarding vom '+fd(v('gdatum')):''].filter(Boolean).join('  ·  ');
+  let h=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:${C.text}">`;
+  h+=`<table ${TBL}max-width:660px;border:1px solid ${C.line}">`;
 
-  // To-dos ganz oben
+  // Kopfbereich
+  h+=`<tr><td style="background:${C.dark};padding:22px 26px">`+
+     `<div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#a7d7c3;font-weight:bold">Enpal · Baubegleitung</div>`+
+     `<div style="font-size:22px;line-height:1.3;color:#ffffff;font-weight:bold;margin:4px 0 0">Ihre Montagevorbereitung</div>`+
+     (meta?`<div style="font-size:13px;color:#cfe8dd;margin:6px 0 0">${esc(meta)}</div>`:'')+
+     `</td></tr>`;
+
+  h+=`<tr><td style="padding:24px 26px 8px">`;
+  h+=`<p style="margin:0 0 12px">${esc(greeting())}</p><p style="margin:0 0 22px">${esc(intro())}</p>`;
+
+  // To-Do's
   if(todos.length){
-    let t=`<p data-sec="todos" style="margin:0 0 6px;font-size:16px;color:${C.orange}"><b>📝 Ihre To-Do’s bis zur Montage</b></p>`;
-    t+=`<ol style="margin:0 0 6px;padding-left:22px">`+todos.map(x=>`<li style="margin:0 0 4px">${esc(x)}</li>`).join('')+'</ol>';
-    t+=`<p style="margin:6px 0 0;font-size:12px;color:${C.muted}">${esc(FOTO_HINWEIS)} Antworten Sie dafür einfach auf diese E-Mail.</p>`;
-    h+=boxHtml(t,C.orangeSoft,C.orange);
+    let t=`<div data-sec="todos" style="font-size:17px;font-weight:bold;color:${C.orange};margin:0 0 4px">Ihre To-Do’s bis zur Montage <span style="font-size:13px;font-weight:normal;color:${C.muted}">(${todos.length} ${todos.length===1?'Punkt':'Punkte'})</span></div>`;
+    t+=`<table ${TBL}margin:8px 0 6px">`;
+    todos.forEach((x,i)=>t+=`<tr><td width="30" style="vertical-align:top;padding:5px 0"><div style="width:22px;height:22px;line-height:22px;border-radius:11px;background:${C.orangeLine};color:#ffffff;font-size:12px;font-weight:bold;text-align:center">${i+1}</div></td><td style="vertical-align:top;padding:6px 0;border-bottom:1px solid #f6e3cc">${esc(x)}</td></tr>`);
+    t+='</table>';
+    t+=`<div style="font-size:12.5px;color:${C.muted};margin:8px 0 0">${esc(FOTO_HINWEIS)} Antworten Sie dafür einfach auf diese E-Mail.</div>`;
+    h+=boxHtml(t,C.orangeSoft,C.orangeLine);
   }
-  // Termine als Tabelle
+  // Termine
   if(termine.length){
-    let t=`<p data-sec="termine" style="margin:0 0 8px;font-size:16px;color:${C.green}"><b>📅 Ihre Montagetermine</b></p><table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse">`;
-    termine.forEach(([d,l,d2])=>t+=`<tr><td style="padding:3px 18px 3px 0;white-space:nowrap;vertical-align:top"><b>${fd(d)}</b>${d2?'<br><b>'+fd(d2)+'</b>':''}</td><td style="padding:3px 0;vertical-align:top">${esc(l)}</td></tr>`);
+    let t=`<div data-sec="termine" style="font-size:17px;font-weight:bold;color:${C.green};margin:0 0 8px">Ihre Montagetermine</div><table ${TBL}">`;
+    termine.forEach(([d,l,d2],i)=>t+=`<tr><td width="120" style="padding:7px 12px 7px 0;white-space:nowrap;vertical-align:top;font-weight:bold;${i?'border-top:1px solid #d9ece2;':''}">${fd(d)}${d2?'<br>'+fd(d2):''}</td><td style="padding:7px 0;vertical-align:top;${i?'border-top:1px solid #d9ece2;':''}">${esc(l)}</td></tr>`);
     t+='</table>';
     h+=boxHtml(t,C.greenSoft,C.green);
   }
 
-  h+=`<p style="margin:8px 0 4px;font-size:13px;color:${C.muted};text-transform:uppercase;letter-spacing:.5px"><b>Die besprochenen Punkte im Detail</b></p>`;
+  // Details
+  h+=`<div style="margin:26px 0 10px;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:${C.muted};font-weight:bold">Die besprochenen Punkte im Detail</div>`;
   S.forEach(s=>{
-    h+=`<p data-sec="${esc(s.title)}" style="margin:20px 0 8px;padding:0 0 4px;border-bottom:2px solid ${C.green};font-size:15px;color:${C.green}"><b>${s.icon}&nbsp; ${esc(s.title)}</b></p>`;
-    h+=parasHtml(s.paras);
+    h+=`<table ${TBL}margin:0 0 16px;border:1px solid ${C.line}">`+
+       `<tr><td data-sec="${esc(s.title)}" style="background:${C.grey};padding:10px 16px;border-bottom:1px solid ${C.line};font-size:15px;font-weight:bold;color:${C.text}">${s.icon}&nbsp;&nbsp;${esc(s.title)}</td></tr>`+
+       `<tr><td style="padding:14px 16px 4px">`+parasHtml(s.paras);
     if(withPhotos&&s.photoKey&&photos[s.photoKey].length){
-      h+='<p style="margin:4px 0 10px">';
-      photos[s.photoKey].forEach(src=>h+=`<img src="${src}" width="260" style="width:260px;max-width:100%;height:auto;margin:0 6px 6px 0;border:1px solid ${C.line}" alt="Foto">`);
+      h+='<p style="margin:2px 0 12px">';
+      photos[s.photoKey].forEach(src=>h+=`<img src="${src}" width="250" style="width:250px;max-width:100%;height:auto;margin:0 6px 6px 0;border:1px solid ${C.line}" alt="Foto">`);
       h+='</p>';
     }
+    h+=`</td></tr></table>`;
   });
 
-  h+=`<div style="height:10px"></div>`+boxHtml(`<p style="margin:0"><b>${esc(widerspruch())}</b></p>`,C.grey,C.muted);
-  h+=`<p style="margin:0 0 14px">${esc(fragen())}</p></div>`;
+  // Abschluss
+  h+=`<table ${TBL}margin:22px 0 18px"><tr><td style="background:${C.grey};border:1px solid ${C.line};padding:14px 18px">`+
+     `<div style="font-size:11px;font-weight:bold;letter-spacing:.6px;text-transform:uppercase;color:${C.muted};margin:0 0 4px">Bestätigung der Absprachen</div>`+
+     `<div style="font-weight:bold">${esc(widerspruch())}</div></td></tr></table>`;
+  h+=`<p style="margin:0 0 18px">${esc(fragen())}</p>`;
+  h+=`</td></tr></table></div>`;
   return h;
 }
 function mailText(){
