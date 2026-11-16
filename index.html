@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <title>Onboarding-Zusammenfassung</title>
 <style>
 :root{
@@ -65,15 +67,99 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1d2430;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.show{opacity:1}
 </style>
+<style>
+/* ===== Design-Update ===== */
+:root{--bg:#f3f5f7;--card:#fff;--text:#18212b;--muted:#617080;--line:#e2e7ec;--accent:#0b6e4f;--accent-2:#0e8a63;--accent-soft:#e6f3ed;--warn:#9a5800;--warn-soft:#fff5e3;--shadow:0 1px 2px rgba(16,24,40,.04),0 2px 8px rgba(16,24,40,.06);--radius:14px}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);padding-bottom:78px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,#0b6e4f,#12946a);color:#fff;padding:14px 20px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:22px}
+header.top h1{margin:0;font-size:19px;font-weight:700;letter-spacing:-.2px}
+header.top p{margin:2px 0 0;font-size:13px;opacity:.9}
+.switch{display:flex;align-items:center;gap:10px;margin:0;color:#fff;font-size:14px;font-weight:600;cursor:pointer;user-select:none}
+.switch input{display:none}
+.slider{width:42px;height:24px;border-radius:24px;background:rgba(255,255,255,.3);position:relative;transition:.2s;flex:none}
+.slider:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
+.switch input:checked+.slider{background:#ffd166}
+.switch input:checked+.slider:after{left:21px}
+.wrap{gap:20px;padding:16px 20px}
+@media(min-width:1050px){.right{top:62px;max-height:calc(100vh - 150px)}}
+fieldset{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:0;margin:0 0 14px;overflow:hidden;scroll-margin-top:64px}
+fieldset>legend{float:left;width:100%;padding:12px 16px;margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;border-bottom:1px solid transparent}
+fieldset:not(.collapsed)>legend{border-bottom-color:var(--line)}
+fieldset>legend .lg-sum{font-weight:500;font-size:12px;color:var(--muted);margin-left:auto;text-align:right}
+fieldset>legend .chev{color:var(--muted);transition:transform .2s;font-size:11px}
+fieldset.collapsed>legend .chev{transform:rotate(-90deg)}
+fieldset .fs-body{clear:both;padding:6px 16px 16px}
+fieldset.collapsed .fs-body{display:none}
+fieldset.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(11,110,79,.12)}
+.badge{font-size:11px;font-weight:700;border-radius:20px;padding:2px 7px;background:var(--warn-soft);color:var(--warn)}
+input[type=text],input[type=email],input[type=tel],input[type=date],input[type=number],input[type=url],select,textarea{border-radius:9px;padding:9px 10px;transition:border-color .15s, box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(11,110,79,.15)}
+label{font-weight:500}
+.chk input{accent-color:var(--accent)}
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:20px;padding:7px 13px;font:inherit;font-size:13.5px;cursor:pointer;line-height:1.3;text-align:left;max-width:100%;transition:.12s}
+.chip:hover{border-color:#b9c4ce}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.chip:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(11,110,79,.25)}
+/* Abschnitts-Navigation */
+.secnav{position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 2px;margin:-4px 0 10px;background:var(--bg);scrollbar-width:thin}
+.secnav button{flex:none;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer;color:var(--text);white-space:nowrap}
+.secnav button .st{width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:700;background:#e9edf1;color:var(--muted)}
+.secnav button.ok .st{background:var(--accent);color:#fff}
+.secnav button.miss .st{background:#f5a524;color:#fff}
+.secnav button.cur{border-color:var(--accent);color:var(--accent)}
+/* Vorschau */
+.right .card{border-radius:var(--radius);box-shadow:var(--shadow);border-color:var(--line)}
+.subject{border-radius:10px}
+.warns{border-radius:10px;cursor:pointer}
+.more-actions{margin-top:12px}
+.more-actions summary{cursor:pointer;font-size:13px;color:var(--muted)}
+.more-actions .btns{margin:8px 0 0}
+/* Aktionsleiste */
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 20px;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(16,24,40,.06)}
+.ab-right{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.ab-btn{border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ab-btn:hover{background:var(--accent-2)}
+.ab-btn.sec{background:#fff;color:var(--accent)}
+.ab-btn.ghost{background:#fff;color:var(--muted);border-color:var(--line);font-weight:500}
+.ab-warn{border:none;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:10px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ab-warn.has{background:var(--warn-soft);color:var(--warn)}
+.ab-mobile{display:none}
+/* Handy / schmale Fenster */
+@media(max-width:1049px){
+  .ab-mobile{display:inline-block}
+  body.show-preview #f{display:none}
+  body:not(.show-preview) .right{display:none}
+  .actionbar{padding:8px 10px}.ab-btn{padding:9px 11px;font-size:13px}.ab-warn{padding:9px 10px;font-size:13px}
+  header.top p{display:none}
+  .wrap{padding:12px}
+}
+fieldset{min-width:0}
+.wrap{grid-template-columns:minmax(0,1fr)}
+@media(min-width:1050px){.wrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:560px){#abCopy,#abNew{display:none}.ab-right{flex-wrap:nowrap}.ab-warn{white-space:nowrap}.terms{grid-template-columns:1fr}.terms .th{display:none}}
+</style>
 </head>
 <body>
-<header>
-  <h1>Onboarding-Zusammenfassung · Montagevorbereitung</h1>
-  <p>Punkte aus dem Kundengespräch ankreuzen bzw. ausfüllen – die Mail rechts entsteht automatisch. Danach als Outlook-Entwurf öffnen oder kopieren.</p>
+<header class="top">
+  <div class="brand">
+    <div class="logo">☀️</div>
+    <div>
+      <h1>Onboarding-Zusammenfassung</h1>
+      <p>Links ausfüllen – rechts entsteht die Kundenmail. Standardwerte sind bereits gesetzt.</p>
+    </div>
+  </div>
+  <label class="switch" title="Blendet Abschnitte mit Standardwerten ein- bzw. aus">
+    <input type="checkbox" id="quickMode"><span class="slider"></span><span class="sw-lbl">Schnellmodus</span>
+  </label>
 </header>
 
 <div class="wrap">
 <form id="f" class="left" autocomplete="off" onsubmit="return false">
+  <nav class="secnav" id="secnav" aria-label="Abschnitte"></nav>
 
   <fieldset>
     <legend>👤 Kunde</legend>
@@ -348,6 +434,15 @@ fieldset.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 </div>
 </div>
 <div id="toast"></div>
+<div class="actionbar" id="actionbar">
+  <button type="button" class="ab-warn" id="abWarn">✓ Alles vollständig</button>
+  <div class="ab-right">
+    <button type="button" class="ab-btn ghost ab-mobile" id="abView">👁 Vorschau</button>
+    <button type="button" class="ab-btn ghost" id="abNew" title="Alle Eingaben löschen">Neu</button>
+    <button type="button" class="ab-btn sec" id="abCopy">📋 Kopieren</button>
+    <button type="button" class="ab-btn" id="abEml">📨 Outlook-Entwurf</button>
+  </div>
+</div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -872,6 +967,137 @@ $('gdatum').value=new Date().toISOString().slice(0,10);
 $('f').addEventListener('input',update);
 $('f').addEventListener('change',update);
 update();
+</script>
+<script>
+/* ===== Bedienung: Chips, Abschnitte, Navigation, Aktionsleiste, Zwischenspeicher ===== */
+(function(){
+const form=$('f');
+const QUICK_COLLAPSE=/Kabelweg|Lieferung|Allgemeine|Sonstiges/;
+const WARN_MAP=[[/Kunde/,/Kundenname|E-Mail des Kunden|Kundennummer/],[/Montagetermine/,/Montagetermin|Tag 2|Klärfahrt/],[/Kabelweg/,/Schornstein|PV-Strings/],
+  [/Aufstellort/,/Aufstellort|Internet|Repeater/],[/Zählerschrank/,/Zählerschrank/],[/Hauptzähler/,/Zählernummer/],[/Wallbox/,/Wallbox/],[/Dach/,/Ersatzziegel/],[/Allgemeine/,/Empfehlungslink/]];
+const fss=[...form.querySelectorAll(':scope > fieldset')];
+
+/* --- Abschnitte einklappbar --- */
+fss.forEach((fs,i)=>{
+  const lg=fs.querySelector('legend');
+  const body=document.createElement('div');body.className='fs-body';
+  [...fs.childNodes].filter(n=>n!==lg).forEach(n=>body.appendChild(n));fs.appendChild(body);
+  const txt=lg.textContent.trim();
+  fs.dataset.icon=txt.split(' ')[0];
+  fs.dataset.name=txt.replace(/^\S+\s*/,'').replace(/\s*[(&,].*$/,'').trim();
+  fs.dataset.key=txt;
+  const m=WARN_MAP.find(([k])=>k.test(txt));fs._wre=m?m[1]:null;
+  lg.insertAdjacentHTML('afterbegin','<span class="chev">▼</span>');
+  lg.insertAdjacentHTML('beforeend','<span class="lg-sum"></span>');
+  lg.addEventListener('click',()=>{fs.classList.toggle('collapsed');paint();});
+  if(!fs.id)fs.id='sec'+i;
+});
+function applyQuick(on){fss.forEach(fs=>{if(QUICK_COLLAPSE.test(fs.dataset.key))fs.classList.toggle('collapsed',on);});paint();}
+
+/* --- Dropdowns als Chips --- */
+const chipSets=[];
+form.querySelectorAll('select').forEach(sel=>{
+  if(sel.options.length>8)return;
+  const box=document.createElement('div');box.className='chips';box.setAttribute('role','radiogroup');
+  [...sel.options].forEach(o=>{
+    const b=document.createElement('button');b.type='button';b.className='chip';b.textContent=o.textContent;b.dataset.v=o.value;b.setAttribute('role','radio');
+    b.addEventListener('click',()=>{if(sel.value===o.value)return;sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}));syncChips();});
+    box.appendChild(b);
+  });
+  sel.style.display='none';sel.after(box);chipSets.push([sel,box]);
+});
+function syncChips(){chipSets.forEach(([sel,box])=>box.querySelectorAll('.chip').forEach(b=>{const on=b.dataset.v===sel.value;b.classList.toggle('on',on);b.setAttribute('aria-checked',on);}));}
+
+/* --- Navigation + Status --- */
+const visited=new Set();
+function paint(){
+  syncChips();
+  const warns=build().warns;
+  const nav=$('secnav');nav.innerHTML='';
+  const cur=form.querySelector('fieldset.active');
+  fss.forEach(fs=>{
+    if(fs.classList.contains('hidden'))return;
+    const n=fs._wre?warns.filter(w=>fs._wre.test(w)).length:0;
+    const b=document.createElement('button');b.type='button';
+    b.className=(n?'miss':(visited.has(fs.id)?'ok':''))+(fs===cur?' cur':'');
+    b.innerHTML=`<span class="st">${n?n:(visited.has(fs.id)?'✓':'')}</span>${fs.dataset.icon} ${esc(fs.dataset.name)}`;
+    b.onclick=()=>goTo(fs);nav.appendChild(b);
+    fs.querySelector('.lg-sum').innerHTML=(n?`<span class="badge">${n} offen</span> `:'')+(fs.classList.contains('collapsed')?'Standard übernommen · aufklappen':'');
+  });
+  const ab=$('abWarn');
+  ab.classList.toggle('has',warns.length>0);
+  ab.textContent=warns.length?`⚠️ ${warns.length} ${warns.length===1?'Punkt':'Punkte'} offen`:'✓ Alles vollständig';
+}
+function goTo(fs){
+  document.body.classList.remove('show-preview');$('abView').textContent='👁 Vorschau';
+  fs.classList.remove('collapsed');
+  fs.scrollIntoView({behavior:'smooth',block:'start'});
+  const f=fs.querySelector('.fs-body input:not([disabled]):not([type=file]),.fs-body .chip,.fs-body textarea');
+  setTimeout(()=>f&&f.focus({preventScroll:true}),400);
+  paint();
+}
+form.addEventListener('focusin',e=>{const fs=e.target.closest('fieldset');if(fs){visited.add(fs.id);setTimeout(paint,0);}});
+form.addEventListener('input',()=>setTimeout(paint,0));
+form.addEventListener('change',()=>setTimeout(paint,0));
+$('abWarn').onclick=()=>{
+  const warns=build().warns;if(!warns.length)return;
+  const fs=fss.find(f=>!f.classList.contains('hidden')&&f._wre&&warns.some(w=>f._wre.test(w)));
+  if(fs)goTo(fs);
+};
+$('warns').onclick=$('abWarn').onclick;
+
+/* --- Enter springt ins nächste Feld --- */
+form.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'||e.target.tagName!=='INPUT'||e.target.type==='checkbox')return;
+  e.preventDefault();
+  const els=[...form.querySelectorAll('input,textarea,.chip')].filter(x=>x.offsetParent&&!x.disabled&&x.type!=='file');
+  const i=els.indexOf(e.target);if(i>-1&&els[i+1])els[i+1].focus();
+});
+
+/* --- Aktionsleiste --- */
+$('abEml').onclick=()=>$('bEml').click();
+$('abCopy').onclick=()=>$('bCopy').click();
+$('abView').onclick=()=>{
+  const on=document.body.classList.toggle('show-preview');
+  $('abView').textContent=on?'✏️ Formular':'👁 Vorschau';window.scrollTo({top:0});
+};
+// selten genutzte Aktionen im Vorschau-Panel einklappen
+const btns=document.querySelector('.right .btns');
+const det=document.createElement('details');det.className='more-actions';
+det.innerHTML='<summary>Weitere Aktionen (Betreff/Text kopieren, Outlook öffnen + einfügen, Fotos herunterladen …)</summary>';
+document.querySelector('.right .card').appendChild(det);det.appendChild(btns);
+
+/* --- Schnellmodus --- */
+let qm=true;try{const q=localStorage.getItem('onbQuick');if(q!==null)qm=q==='1';}catch(e){}
+$('quickMode').checked=qm;applyQuick(qm);
+$('quickMode').addEventListener('change',e=>{try{localStorage.setItem('onbQuick',e.target.checked?'1':'0');}catch(_){}applyQuick(e.target.checked);});
+
+/* --- Zwischenspeicher (Entwurf) --- */
+const KEY='onbDraft';
+const fields=()=>[...form.querySelectorAll('input[id],select[id],textarea[id]')].filter(x=>x.type!=='file');
+let saveT;
+function saveDraft(){clearTimeout(saveT);saveT=setTimeout(()=>{
+  const d={};fields().forEach(x=>d[x.id]=x.type==='checkbox'?x.checked:x.value);
+  try{localStorage.setItem(KEY,JSON.stringify({t:Date.now(),d}));}catch(e){}
+},300);}
+form.addEventListener('input',saveDraft);form.addEventListener('change',saveDraft);
+try{
+  const raw=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(raw&&raw.d){
+    fields().forEach(x=>{if(!(x.id in raw.d))return;if(x.type==='checkbox')x.checked=raw.d[x.id];else x.value=raw.d[x.id];});
+    update();
+    if(raw.d.kname||raw.d.projnr)setTimeout(()=>toast('Entwurf wiederhergestellt'+(raw.d.kname?' ('+raw.d.kname+')':'')+' – Fotos ggf. neu hinzufügen'),300);
+  }
+}catch(e){}
+function resetAll(){
+  if(!confirm('Alle Eingaben für diesen Kunden löschen?'))return;
+  try{localStorage.removeItem(KEY);}catch(e){}
+  location.reload();
+}
+$('bReset').onclick=resetAll;$('abNew').onclick=resetAll;
+
+paint();
+})();
 </script>
 </body>
 </html>
