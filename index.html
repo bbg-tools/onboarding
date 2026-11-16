@@ -1208,7 +1208,7 @@ const NEED=[[/Kundenname/,'#kname','Nachname eintragen'],[/E-Mail des Kunden/,'#
   [/Repeater/,'#lanDetail','Router-Standort / Entfernung eintragen'],[/Foto vom Aufstellort/,'.photo[data-key=aufstellort]','Foto vom Aufstellort hochladen'],
   [/Ort des Zählerschranks/,'#zsOrt','Ort des Zählerschranks eintragen'],[/Platz für neuen/,'#zsNeuOrt','Platz für den neuen Zählerschrank eintragen'],
   [/Zählernummer/,'#znr','Zählernummer eintragen'],[/Erdarbeiten Wallbox/,'#wbT30','Grabentiefe auswählen'],
-  [/Foto vom Wallbox/,'.photo[data-key=wallbox]','Foto vom Wallbox-Montageort hochladen'],[/Ersatzziegel/,'#modanz','Modulanzahl eintragen (oder Ersatzziegel-Anzahl)'],
+  [/Foto vom Wallbox/,'.photo[data-key=wallbox]','Foto vom Wallbox-Montageort hochladen'],[/Ersatzziegel/,'#zanz','Anzahl Ersatzziegel eintragen – oder Modulanzahl unter „Konfiguration“, dann wird automatisch gerechnet'],
   [/Empfehlungslink/,'#reflink','Empfehlungslink eintragen']];
 function anchorOf(sel){
   let el=form.querySelector(sel);if(!el)return null;
@@ -1223,7 +1223,11 @@ function markNeeds(warns){
   warns.forEach(w=>{
     const m=NEED.find(([re])=>re.test(w));
     const el=m?anchorOf(m[1]):null;
-    if(!el||!el.offsetParent&&!el.closest('fieldset.collapsed'))return;
+    if(!el||!el.offsetParent&&!el.closest('fieldset.collapsed')){
+      const fs=fss.find(f=>f._wre&&f._wre.test(w));
+      if(fs){if(!perFs.has(fs))perFs.set(fs,[]);perFs.get(fs).push([m?m[2]:w,null]);}
+      return;
+    }
     el.classList.add('need');
     const hint=document.createElement('div');hint.className='need-hint';hint.textContent='⚠️ '+m[2];
     el.after(hint);
@@ -1233,7 +1237,8 @@ function markNeeds(warns){
     const box=document.createElement('div');box.className='sec-warns';
     box.innerHTML='<b>Noch offen:</b>';
     items.forEach(([t,el])=>{const a=document.createElement('button');a.type='button';a.textContent=t;
-      a.onclick=()=>{el.scrollIntoView({behavior:'smooth',block:'center'});const f=el.matches('input')?el:el.querySelector('input,.chip');setTimeout(()=>f&&f.focus({preventScroll:true}),350);};
+      if(!el){a.disabled=true;a.style.cursor='default';}
+      else a.onclick=()=>{el.scrollIntoView({behavior:'smooth',block:'center'});const f=el.matches('input')?el:el.querySelector('input,.chip');setTimeout(()=>f&&f.focus({preventScroll:true}),350);};
       box.appendChild(a);});
     fs.querySelector('.fs-body').prepend(box);
   });
