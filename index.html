@@ -288,6 +288,21 @@ label.need{color:#a24d00}
 .chips.need{border:1px solid;border-radius:14px;padding:4px}
 .need-hint{font-size:12px;font-weight:600;color:#b45616;margin:4px 0 2px}
 </style>
+<style>
+/* ===== Filter „Noch offene Punkte“ ===== */
+.secnav .filter-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:12px;padding:11px 12px;margin:0 0 10px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;background:linear-gradient(90deg,#ffb05c,#ff8a4c);color:#fff;box-shadow:0 2px 8px rgba(255,138,76,.35)}
+.secnav .filter-btn:hover{filter:brightness(1.05)}
+.secnav .filter-btn .fb-n{background:#fff;color:#d2601a;border-radius:980px;min-width:22px;height:22px;display:inline-grid;place-items:center;font-size:12px;padding:0 6px}
+.secnav .filter-btn.on{background:#1d1d1f;box-shadow:none}
+.secnav .filter-btn.none{background:#dff5e8;color:#23874f;box-shadow:none;cursor:default}
+@media(max-width:1049px){.secnav .filter-btn{width:auto;flex:none;margin:0;border-radius:980px;padding:7px 14px}}
+.ab-warn.on{background:#1d1d1f;color:#fff}
+body.filter-open #f>fieldset:not(.f-fs){display:none}
+body.filter-open #f>fieldset.collapsed .fs-body{display:block}
+body.filter-open .fs-body>:not(.f-keep):not(.f-all):not(.sec-warns):not(.need-hint){display:none}
+body.filter-open .f-keep:not(.f-all)>:not(.f-keep):not(.f-all):not(.need-hint):not(.sec-warns){display:none}
+body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;-webkit-text-fill-color:#b45616;color:#b45616}
+</style>
 </head>
 <body>
 <header class="top">
@@ -1202,7 +1217,7 @@ function syncChips(){chipSets.forEach(([sel,box])=>box.querySelectorAll('.chip')
 
 /* --- Fehlende Angaben direkt am Feld anzeigen --- */
 const NEED=[[/Kundenname/,'#kname','Nachname eintragen'],[/E-Mail des Kunden/,'#kmail','E-Mail-Adresse eintragen'],[/Kundennummer/,'#projnr','DE-Nummer eintragen'],
-  [/Kein Montagetermin/,'#mstart','Mindestens einen Termin eintragen'],[/Tag 2/,'.terms','Tag 2 muss nach Tag 1 liegen'],[/Klärfahrt/,'#acmdatum','ACM-Datum für die Klärfahrt eintragen'],
+  [/Kein Montagetermin/,'.terms','Mindestens einen Termin eintragen'],[/Tag 2/,'.terms','Tag 2 muss nach Tag 1 liegen'],[/Klärfahrt/,'#acmdatum','ACM-Datum für die Klärfahrt eintragen'],
   [/Schornstein: ohne DC/,'#kabelweg','DC-Termin eintragen, sonst fehlt die Frist für den Schornsteinfeger'],
   [/Erdarbeiten PV-Strings/,'#strT30','Grabentiefe auswählen'],[/kein Internet/,'#lan','Rückmeldung des Kunden zum Internet nachhalten'],
   [/Repeater/,'#lanDetail','Router-Standort / Entfernung eintragen'],[/Foto vom Aufstellort/,'.photo[data-key=aufstellort]','Foto vom Aufstellort hochladen'],
@@ -1213,7 +1228,7 @@ const NEED=[[/Kundenname/,'#kname','Nachname eintragen'],[/E-Mail des Kunden/,'#
 function anchorOf(sel){
   let el=form.querySelector(sel);if(!el)return null;
   if(el.tagName==='SELECT'){const ch=el.nextElementSibling;if(ch&&ch.classList.contains('chips'))el=ch;}
-  if(el.type==='checkbox'){const l=el.closest('label')||el;el=(el.dataset.depth!==undefined&&l.previousElementSibling&&l.previousElementSibling.tagName==='LABEL')?l.previousElementSibling:l;}
+  if(el.type==='checkbox'){const l=el.closest('label')||el;let pv=l.previousElementSibling;while(pv&&pv.classList.contains('need-hint'))pv=pv.previousElementSibling;el=(el.dataset.depth!==undefined&&pv&&pv.tagName==='LABEL'&&!pv.classList.contains('chk'))?pv:l;}
   return el;
 }
 function markNeeds(warns){
@@ -1249,7 +1264,11 @@ const visited=new Set();
 function paint(){
   syncChips();
   const warns=build().warns;
-  const nav=$('secnav');nav.innerHTML='<span class="nav-title">Abschnitte</span>';
+  const nav=$('secnav');nav.innerHTML='';
+  const fb=document.createElement('button');fb.type='button';fb.className='filter-btn'+(filterOn?' on':'')+(warns.length?'':' none');
+  fb.innerHTML=filterOn?'✕ Alle Abschnitte anzeigen':(warns.length?`<span class="fb-n">${warns.length}</span> Noch offene Punkte`:'✓ Alles vollständig');
+  fb.onclick=()=>toggleFilter();nav.appendChild(fb);
+  nav.insertAdjacentHTML('beforeend','<span class="nav-title">Abschnitte</span>');
   const cur=form.querySelector('fieldset.active');
   fss.forEach(fs=>{
     if(fs.classList.contains('hidden'))return;
@@ -1261,11 +1280,37 @@ function paint(){
     fs.querySelector('.lg-sum').innerHTML=(n?`<span class="badge">${n} offen</span> `:'')+(fs.classList.contains('collapsed')?'Standard übernommen · aufklappen':'');
   });
   markNeeds(warns);
-  const done=nav.querySelectorAll('button.ok').length,tot=nav.querySelectorAll('button').length;
+  const done=nav.querySelectorAll('button.ok').length,tot=nav.querySelectorAll('button:not(.filter-btn)').length;
   nav.insertAdjacentHTML('beforeend',`<div class="nav-sum">${warns.length?'⚠️ '+warns.length+' offen':'✓ Alles vollständig'} · ${done}/${tot} bearbeitet</div>`);
   const ab=$('abWarn');
   ab.classList.toggle('has',warns.length>0);
-  ab.textContent=warns.length?`⚠️ ${warns.length} ${warns.length===1?'Punkt':'Punkte'} offen`:'✓ Alles vollständig';
+  ab.textContent=filterOn?'✕ Alle anzeigen':(warns.length?`⚠️ ${warns.length} ${warns.length===1?'Punkt':'Punkte'} offen`:'✓ Alles vollständig');
+  ab.classList.toggle('on',filterOn);
+  if(filterOn&&!warns.length&&!filterDoneShown){filterDoneShown=true;toast('Alle Punkte erledigt 🎉 – Filter mit „Alle anzeigen“ aufheben');}
+}
+/* --- Filter: nur offene Punkte --- */
+let filterOn=false,filterDoneShown=false;
+function toggleFilter(force){
+  const on=force!==undefined?force:!filterOn;
+  form.querySelectorAll('.f-keep,.f-all,.f-fs').forEach(x=>x.classList.remove('f-keep','f-all','f-fs'));
+  if(on){
+    const warns=build().warns;
+    if(!warns.length){toast('Keine offenen Punkte – alles vollständig ✓');return;}
+    warns.forEach(w=>{
+      const m=NEED.find(([re])=>re.test(w));const el=m?anchorOf(m[1]):null;
+      const fs=el?el.closest('fieldset'):fss.find(f=>f._wre&&f._wre.test(w));
+      if(fs)fs.classList.add('f-fs');
+      if(!el)return;
+      const keepAll=[el];
+      if(el.id){const l=form.querySelector(`label[for="${el.id}"]`);if(l)keepAll.push(l);}
+      if(el.classList.contains('chips')){const sel=el.previousElementSibling;if(sel&&sel.id){const l=form.querySelector(`label[for="${sel.id}"]`);if(l)keepAll.push(l);}}
+      if(el.tagName==='LABEL'&&!el.classList.contains('chk')){let n=el.nextElementSibling;while(n&&(n.classList.contains('need-hint')||(n.matches('label.chk')&&n.querySelector('[data-depth]')))){if(!n.classList.contains('need-hint'))keepAll.push(n);n=n.nextElementSibling;}}
+      keepAll.forEach(k=>{k.classList.add('f-all');let p=k.parentElement;while(p&&p!==form&&p.tagName!=='FIELDSET'){p.classList.add('f-keep');p=p.parentElement;}});
+    });
+  }
+  filterOn=on;filterDoneShown=false;document.body.classList.toggle('filter-open',on);
+  window.scrollTo({top:0,behavior:'smooth'});
+  paint();
 }
 function goTo(fs){
   document.body.classList.remove('show-preview');$('abView').textContent='👁 Vorschau';
@@ -1278,11 +1323,7 @@ function goTo(fs){
 form.addEventListener('focusin',e=>{const fs=e.target.closest('fieldset');if(fs){visited.add(fs.id);setTimeout(paint,0);}});
 form.addEventListener('input',()=>setTimeout(paint,0));
 form.addEventListener('change',()=>setTimeout(paint,0));
-$('abWarn').onclick=()=>{
-  const warns=build().warns;if(!warns.length)return;
-  const fs=fss.find(f=>!f.classList.contains('hidden')&&f._wre&&warns.some(w=>f._wre.test(w)));
-  if(fs)goTo(fs);
-};
+$('abWarn').onclick=()=>toggleFilter();
 $('warns').onclick=$('abWarn').onclick;
 
 /* --- Enter springt ins nächste Feld --- */
