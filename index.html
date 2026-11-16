@@ -1379,5 +1379,10 @@ $('bReset').onclick=resetAll;$('abNew').onclick=resetAll;
 paint();
 })();
 </script>
+<script>
+/* Zahlenfelder: Mausrad/Touchpad darf den Wert nicht verändern */
+document.addEventListener('wheel',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&document.activeElement===t){e.preventDefault();}},{passive:false});
+document.addEventListener('keydown',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&(e.key==='ArrowUp'||e.key==='ArrowDown'))e.preventDefault();});
+</script>
 </body>
 </html>
