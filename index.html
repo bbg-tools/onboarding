@@ -275,6 +275,19 @@ fieldset .photo{border-color:color-mix(in srgb,var(--sec-fg) 35%,#fff);backgroun
 .ab-warn.has{background:#ffe9da;color:#b45616}
 .badge{background:#ffe9da;color:#b45616}
 </style>
+<style>
+/* ===== Fehlende Angaben sichtbar ===== */
+.sec-warns{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#fff4e5;border:1px solid #ffd8a8;color:#a24d00;border-radius:12px;padding:8px 10px;margin:8px 0 6px;font-size:13px}
+.sec-warns b{margin-right:2px}
+.sec-warns button{border:none;background:#fff;color:#a24d00;border-radius:980px;padding:4px 10px;font:inherit;font-size:12.5px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.sec-warns button:hover{background:#ffe8cc}
+input.need,.photo.need,.chips.need{border-color:#ff9f0a!important;box-shadow:0 0 0 3px rgba(255,159,10,.18)}
+.photo.need{background:#fff8ee!important}
+label.need{color:#a24d00}
+.terms.need{outline:2px solid rgba(255,159,10,.5);outline-offset:4px;border-radius:8px}
+.chips.need{border:1px solid;border-radius:14px;padding:4px}
+.need-hint{font-size:12px;font-weight:600;color:#b45616;margin:4px 0 2px}
+</style>
 </head>
 <body>
 <header class="top">
@@ -1187,6 +1200,45 @@ form.querySelectorAll('select').forEach(sel=>{
 });
 function syncChips(){chipSets.forEach(([sel,box])=>box.querySelectorAll('.chip').forEach(b=>{const on=b.dataset.v===sel.value;b.classList.toggle('on',on);b.setAttribute('aria-checked',on);}));}
 
+/* --- Fehlende Angaben direkt am Feld anzeigen --- */
+const NEED=[[/Kundenname/,'#kname','Nachname eintragen'],[/E-Mail des Kunden/,'#kmail','E-Mail-Adresse eintragen'],[/Kundennummer/,'#projnr','DE-Nummer eintragen'],
+  [/Kein Montagetermin/,'#mstart','Mindestens einen Termin eintragen'],[/Tag 2/,'.terms','Tag 2 muss nach Tag 1 liegen'],[/Klärfahrt/,'#acmdatum','ACM-Datum für die Klärfahrt eintragen'],
+  [/Schornstein: ohne DC/,'#kabelweg','DC-Termin eintragen, sonst fehlt die Frist für den Schornsteinfeger'],
+  [/Erdarbeiten PV-Strings/,'#strT30','Grabentiefe auswählen'],[/kein Internet/,'#lan','Rückmeldung des Kunden zum Internet nachhalten'],
+  [/Repeater/,'#lanDetail','Router-Standort / Entfernung eintragen'],[/Foto vom Aufstellort/,'.photo[data-key=aufstellort]','Foto vom Aufstellort hochladen'],
+  [/Ort des Zählerschranks/,'#zsOrt','Ort des Zählerschranks eintragen'],[/Platz für neuen/,'#zsNeuOrt','Platz für den neuen Zählerschrank eintragen'],
+  [/Zählernummer/,'#znr','Zählernummer eintragen'],[/Erdarbeiten Wallbox/,'#wbT30','Grabentiefe auswählen'],
+  [/Foto vom Wallbox/,'.photo[data-key=wallbox]','Foto vom Wallbox-Montageort hochladen'],[/Ersatzziegel/,'#modanz','Modulanzahl eintragen (oder Ersatzziegel-Anzahl)'],
+  [/Empfehlungslink/,'#reflink','Empfehlungslink eintragen']];
+function anchorOf(sel){
+  let el=form.querySelector(sel);if(!el)return null;
+  if(el.tagName==='SELECT'){const ch=el.nextElementSibling;if(ch&&ch.classList.contains('chips'))el=ch;}
+  if(el.type==='checkbox'){const l=el.closest('label')||el;el=(el.dataset.depth!==undefined&&l.previousElementSibling&&l.previousElementSibling.tagName==='LABEL')?l.previousElementSibling:l;}
+  return el;
+}
+function markNeeds(warns){
+  form.querySelectorAll('.need').forEach(x=>x.classList.remove('need'));
+  form.querySelectorAll('.need-hint,.sec-warns').forEach(x=>x.remove());
+  const perFs=new Map();
+  warns.forEach(w=>{
+    const m=NEED.find(([re])=>re.test(w));
+    const el=m?anchorOf(m[1]):null;
+    if(!el||!el.offsetParent&&!el.closest('fieldset.collapsed'))return;
+    el.classList.add('need');
+    const hint=document.createElement('div');hint.className='need-hint';hint.textContent='⚠️ '+m[2];
+    el.after(hint);
+    const fs=el.closest('fieldset');if(fs){if(!perFs.has(fs))perFs.set(fs,[]);perFs.get(fs).push([m[2],el]);}
+  });
+  perFs.forEach((items,fs)=>{
+    const box=document.createElement('div');box.className='sec-warns';
+    box.innerHTML='<b>Noch offen:</b>';
+    items.forEach(([t,el])=>{const a=document.createElement('button');a.type='button';a.textContent=t;
+      a.onclick=()=>{el.scrollIntoView({behavior:'smooth',block:'center'});const f=el.matches('input')?el:el.querySelector('input,.chip');setTimeout(()=>f&&f.focus({preventScroll:true}),350);};
+      box.appendChild(a);});
+    fs.querySelector('.fs-body').prepend(box);
+  });
+}
+
 /* --- Navigation + Status --- */
 const visited=new Set();
 function paint(){
@@ -1203,6 +1255,7 @@ function paint(){
     b.onclick=()=>goTo(fs);nav.appendChild(b);
     fs.querySelector('.lg-sum').innerHTML=(n?`<span class="badge">${n} offen</span> `:'')+(fs.classList.contains('collapsed')?'Standard übernommen · aufklappen':'');
   });
+  markNeeds(warns);
   const done=nav.querySelectorAll('button.ok').length,tot=nav.querySelectorAll('button').length;
   nav.insertAdjacentHTML('beforeend',`<div class="nav-sum">${warns.length?'⚠️ '+warns.length+' offen':'✓ Alles vollständig'} · ${done}/${tot} bearbeitet</div>`);
   const ab=$('abWarn');
