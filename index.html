@@ -642,7 +642,7 @@ $('zanz').addEventListener('input',()=>{$('zanz').dataset.manual=$('zanz').value
 
 /* ---------- Mail-Inhalt ---------- */
 function subject(){
-  return 'Zusammenfassung Ihres Onboarding-Gesprächs & Montagevorbereitung'+(v('projnr')?' – '+v('projnr'):'');
+  return "ENPAL | Montagevorbereitung: Ihre To-Do's & Zusammenfassung"+(v('projnr')?' – '+v('projnr'):'');
 }
 function joinList(a){return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' und '+a[a.length-1];}
 const DEPTH_TXT={30:'30 cm direkt am Gebäude bzw. an der Garage',60:'60 cm im Garten',80:'80 cm unter befahrenen Wegen und Einfahrten'};
@@ -1055,6 +1055,7 @@ function buildEml(){
   if(v('kmail'))e+='To: '+v('kmail')+'\r\n';
   e+='Bcc: '+BCC+'\r\n';
   e+='Subject: =?UTF-8?B?'+b64(subject())+'?=\r\n';
+  e+='X-Priority: 1 (Highest)\r\nX-MSMail-Priority: High\r\nImportance: High\r\nPriority: urgent\r\n';
   e+='X-Unsent: 1\r\nMIME-Version: 1.0\r\nContent-Type: multipart/related; boundary="'+B+'"\r\n\r\n';
   e+='--'+B+'\r\nContent-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\n\r\n'+wrap76(b64(html))+'\r\n';
   imgs.forEach((d,i)=>{
