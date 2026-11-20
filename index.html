@@ -525,7 +525,7 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
     </div>
     <label class="chk"><input type="checkbox" id="beta"> Montage mit Beta-Platte (SL Rack) – Aufklärung vom Kunden unterschrieben</label>
     <label class="chk"><input type="checkbox" id="bruechig"> Ziegel spröde/brüchig (100 % der Module)</label>
-    <div class="hint" id="zHint">Automatisch: Beton 50 % der Module + 5 · Ton 75 % + 5 · brüchig 100 %. Manuell überschreibbar.</div>
+    <div class="hint" id="zHint">Automatisch: Beton 50 % der Module + 5 · Ton 75 % + 5 · brüchig 100 % · Bestandsanlage +50 %. Manuell überschreibbar.</div>
     <label for="ziegel">Ersatzziegel</label>
     <select id="ziegel">
       <option value="besorgt">Kunde besorgt bis Montagetag</option>
@@ -537,6 +537,14 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
     <label class="chk"><input type="checkbox" id="geruest"> Gerüst wird gestellt</label>
     <label class="chk"><input type="checkbox" id="sperre"> Straßen-/Gehwegsperrung für das Gerüst nötig</label>
     <div class="photo" data-key="geruest" data-label="Gerüst-Planung (welche Seite eingerüstet wird)"></div>
+    <label class="chk"><input type="checkbox" id="altpv"> Bestandsanlage (alte PV) vorhanden – wird durch uns abgebaut</label>
+    <div id="altBox" class="hidden">
+      <select id="altVerbleib">
+        <option value="entsorgen">Altanlage wird durch uns entsorgt</option>
+        <option value="behalten">Kunde behält die Altanlage</option>
+      </select>
+      <p class="hint">Abgebaut werden Module, Unterkonstruktion und alter Wechselrichter. Speicher, Kabelwege etc. bleiben beim Kunden. Ersatzziegel werden automatisch um 50 % erhöht.</p>
+    </div>
     <div class="photo" data-key="ziegel" data-label="Ziegel (damit der Kunde passende Ersatzziegel besorgen kann)"></div>
   </fieldset>
 
@@ -667,8 +675,8 @@ function compress(file){
 /* ---------- Ersatzziegel automatisch ---------- */
 function calcZiegel(){
   const n=parseInt(v('modanz'),10);if(!n)return'';
-  if(c('bruechig'))return n;
-  return v('dach')==='beton'?Math.ceil(n*.5)+5:Math.ceil(n*.75)+5;
+  const base=c('bruechig')?n:v('dach')==='beton'?Math.ceil(n*.5)+5:Math.ceil(n*.75)+5;
+  return c('altpv')?Math.ceil(base*1.5):base; // Abbau Altanlage: erhöhtes Bruchrisiko
 }
 $('zanz').addEventListener('input',()=>{$('zanz').dataset.manual=$('zanz').value?'1':'';});
 
@@ -858,8 +866,9 @@ function build(){
     d.push('Bitte halten Sie für die Montage '+(n?'ca. '+n+' ':'')+'passende Ersatzziegel bzw. -steine vor Ort bereit.'+(zInfo?' Ihre aktuelle Dacheindeckung: '+zInfo+'.':''));
     d.push('So können wir eventuelle Vorschäden wie Haarrisse oder brüchige Ziegel direkt austauschen, während wir ohnehin auf Ihrem Dach sind. Das erspart Ihnen einen späteren Dachdecker-Einsatz und die damit verbundenen Kosten.');
     if(zi==='vorhanden')d.push('✔️ Laut unserem Gespräch sind ausreichend Ersatzziegel vorhanden.');
-    if(zi==='besorgt'){d.push('👉 Sie organisieren die Ersatzziegel bis zum Montagetag.');todos.push('Ersatzziegel'+(n?' (ca. '+n+' Stück)':'')+' bis zum Montagetag besorgen');}
+    if(zi==='besorgt'){d.push('👉 Sie organisieren die Ersatzziegel bis zum Montagetag.');todos.push('Ersatzziegel'+(n?' (ca. '+n+' Stück'+(c('altpv')?' – erhöht wegen Abbau der Altanlage':'')+')':'')+' bis zum Montagetag besorgen');}
     if(zi==='ausstehend'){d.push('📌 Bitte geben Sie mir kurz Rückmeldung, ob Ersatzziegel vorhanden sind. Falls nicht, besorgen Sie diese bitte vor dem Montagetag.');todos.push('Rückmeldung zu Ersatzziegeln (vorhanden / nicht vorhanden)');}
+    if(c('altpv'))d.push('⚠️ Da wir Ihre bestehende PV-Anlage abbauen, besteht ein erhöhtes Risiko für Ziegelbruch. Bitte halten Sie deshalb mehr Ersatzziegel bereit als üblich'+(n?' – die oben genannte Menge ist bereits entsprechend erhöht':'')+'.');
     if(!n)warns.push('Anzahl Ersatzziegel fehlt (Modulanzahl eintragen)');
   }
   if(c('blitz')){
@@ -870,6 +879,16 @@ function build(){
   if(c('beta'))d.push('🧩 Wie bereits mit Ihnen besprochen, kommt bei Ihrer Anlage die Beta-Platte von SL Rack zum Einsatz – ein Universal-Blechziegel, der an den nötigen Stellen anstelle einzelner Original-Dachziegel verbaut wird. Die Aufklärung dazu haben Sie bereits unterschrieben.');
   if(photos.ziegel&&photos.ziegel.length&&!noZiegel)d.push('📷 Zur Orientierung finden Sie unten Fotos Ihrer aktuellen Dacheindeckung. Damit können Sie beim Baustoffhändler bzw. Dachdecker gezielt die passenden Ersatzziegel besorgen.');
   sec('🧱','Dach & Ersatzziegel',d,['ziegel','geruest']);
+
+  // Bestandsanlage
+  if(c('altpv')){
+    const a=['Ihre bestehende PV-Anlage wird von unserem Montageteam abgebaut. Dabei demontieren wir die Module, die Unterkonstruktion sowie den alten Wechselrichter.'];
+    a.push(v('altVerbleib')==='behalten'?'Die demontierten Komponenten verbleiben bei Ihnen und werden nach dem Abbau vor Ort abgestellt.':'Die Altanlage wird anschließend durch uns fachgerecht entsorgt.');
+    a.push('Weitere Bestandteile der Altanlage – z. B. ein vorhandener Speicher oder bestehende Kabelwege – bleiben bestehen und liegen weiterhin in Ihrer Verantwortung.');
+    if(!noZiegel)a.push('⚠️ Der Abbau ist ein Service von uns. Dabei kann es vermehrt zu Ziegelbruch kommen – deshalb sind ausreichend Ersatzziegel entscheidend (siehe „Dach & Ersatzziegel“).');
+    else a.push('Der Abbau ist ein Service von uns.');
+    sec('♻️','Ihre bestehende PV-Anlage',a);
+  }
 
   // Lieferung
   if(c('h_liefer')){
@@ -1039,6 +1058,7 @@ function toggles(){
   $('wbSet').classList.toggle('hidden',!c('k_wb'));
   $('wbErdBox').classList.toggle('hidden',v('wbErd')!=='ja');
   $('holzBox').classList.toggle('hidden',!c('holz'));
+  $('altBox').classList.toggle('hidden',!c('altpv'));
   $('wbStBox').classList.toggle('hidden',v('wbOrt')!=='Standfuß / Ständer');
   $('zsNeuBox').classList.toggle('hidden',v('zsStatus')!=='zss');
   $('schornInfo').classList.toggle('hidden',v('kabelweg')!=='schornstein');
