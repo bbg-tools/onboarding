@@ -1348,6 +1348,7 @@ $('bPdf').onclick=()=>{
   w.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
 <style>@page{size:A4;margin:12mm}html,body{background:#fff}body{margin:0 auto;padding:16px;max-width:720px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 img{max-width:100%!important;height:auto!important;break-inside:avoid}
+table[style*="max-width"]{max-width:none!important;width:100%!important}body>div:not(.pdf-hint){max-width:none!important}
 .pdf-hint{font:14px/1.5 -apple-system,Segoe UI,Arial,sans-serif;color:#1d3d66;background:#eef4ff;border-radius:12px;padding:12px 14px;margin:0 0 16px}
 .pdf-hint button{font:inherit;font-weight:600;border:none;background:#0071e3;color:#fff;border-radius:980px;padding:7px 14px;margin-top:8px;cursor:pointer}
 @media print{.pdf-hint{display:none}body{padding:0;max-width:none}}</style></head><body>
