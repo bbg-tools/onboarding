@@ -584,6 +584,7 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
       <button class="b" id="bEml">📨 Als Outlook-Entwurf öffnen</button>
       <button class="b sec" id="bCopy">📋 Mail kopieren (inkl. Fotos)</button>
       <button class="b sec" id="bOutlook">✉️ Outlook öffnen + einfügen</button>
+      <button class="b sec" id="bPdf" title="z. B. für WhatsApp">📄 Als PDF (z. B. WhatsApp)</button>
       <button class="b ghost" id="bSubj">Betreff kopieren</button>
       <button class="b ghost" id="bText">Nur Text kopieren</button>
       <button class="b ghost" id="bDl">Fotos herunterladen</button>
@@ -604,6 +605,7 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
   <div class="ab-right">
     <button type="button" class="ab-btn ghost ab-mobile" id="abView">👁 Vorschau</button>
     <button type="button" class="ab-btn ghost" id="abNew" title="Alle Eingaben löschen">Neu</button>
+    <button type="button" class="ab-btn sec" id="abPdf" title="Als PDF speichern, z. B. für WhatsApp">📄 PDF</button>
     <button type="button" class="ab-btn sec" id="abCopy">📋 Kopieren</button>
     <button type="button" class="ab-btn" id="abEml">📨 Outlook-Entwurf</button>
   </div>
@@ -1337,6 +1339,24 @@ form.addEventListener('keydown',e=>{
 /* --- Aktionsleiste --- */
 $('abEml').onclick=()=>$('bEml').click();
 $('abCopy').onclick=()=>$('bCopy').click();
+$('abPdf').onclick=()=>$('bPdf').click();
+/* ===== PDF (z. B. für WhatsApp): Druckansicht → „Als PDF speichern“ ===== */
+$('bPdf').onclick=()=>{
+  const title=`ENPAL Montagevorbereitung ${v('projnr')||''}`.trim();
+  const w=window.open('','_blank');
+  if(!w){toast('Pop-up blockiert – bitte Pop-ups für diese Seite erlauben');return;}
+  w.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<style>@page{size:A4;margin:12mm}html,body{background:#fff}body{margin:0 auto;padding:16px;max-width:720px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+img{max-width:100%!important;height:auto!important;break-inside:avoid}
+.pdf-hint{font:14px/1.5 -apple-system,Segoe UI,Arial,sans-serif;color:#1d3d66;background:#eef4ff;border-radius:12px;padding:12px 14px;margin:0 0 16px}
+.pdf-hint button{font:inherit;font-weight:600;border:none;background:#0071e3;color:#fff;border-radius:980px;padding:7px 14px;margin-top:8px;cursor:pointer}
+@media print{.pdf-hint{display:none}body{padding:0;max-width:none}}</style></head><body>
+<div class="pdf-hint">📄 Im Druckfenster als Ziel <b>„Als PDF speichern“</b> wählen – am Handy über <b>Teilen → Drucken</b> bzw. <b>PDF</b>. Die Datei dann per WhatsApp an den Kunden senden.<br><button onclick="print()">Druckfenster erneut öffnen</button></div>
+${curHtml().replace(/Erhalt dieser E-Mail/g,'Erhalt dieser Zusammenfassung').replace(/auf diese E-Mail/g,'auf diese Nachricht')}</body></html>`);
+  w.document.close();
+  const imgs=[...w.document.images];
+  Promise.all(imgs.map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r;}))).then(()=>setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300));
+};
 $('abView').onclick=()=>{
   const on=document.body.classList.toggle('show-preview');
   $('abView').textContent=on?'✏️ Formular':'👁 Vorschau';window.scrollTo({top:0});
@@ -1344,7 +1364,7 @@ $('abView').onclick=()=>{
 // selten genutzte Aktionen im Vorschau-Panel einklappen
 const btns=document.querySelector('.right .btns');
 const det=document.createElement('details');det.className='more-actions';
-det.innerHTML='<summary>Weitere Aktionen (Betreff/Text kopieren, Outlook öffnen + einfügen, Fotos herunterladen …)</summary>';
+det.innerHTML='<summary>Weitere Aktionen (PDF für WhatsApp, Betreff/Text kopieren, Outlook öffnen + einfügen, Fotos herunterladen …)</summary>';
 document.querySelector('.right .card').appendChild(det);det.appendChild(btns);
 
 /* --- Schnellmodus --- */
