@@ -535,6 +535,7 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
     </select>
     <label class="chk"><input type="checkbox" id="blitz"> Blitzschutzanlage vorhanden</label>
     <label class="chk"><input type="checkbox" id="geruest"> Gerüst wird gestellt</label>
+    <label class="chk"><input type="checkbox" id="sperre"> Straßen-/Gehwegsperrung nötig (z. B. für Gerüst oder Anlieferung)</label>
     <div class="photo" data-key="ziegel" data-label="Ziegel (damit der Kunde passende Ersatzziegel besorgen kann)"></div>
   </fieldset>
 
@@ -864,6 +865,7 @@ function build(){
     d.push('⚡ Ihre Blitzschutzanlage: Zu allen leitenden Teilen müssen mindestens 50 cm Abstand eingehalten werden – andernfalls muss die Blitzschutzanlage vollständig abgebaut werden (ein teilweiser Umbau ist nicht möglich). Die genaue Vorgehensweise stimme ich mit Ihnen ab; eine Demontage bestätigen Sie mir bitte schriftlich per E-Mail unter Angabe Ihrer Kundennummer.');
   }
   if(c('geruest'))d.push('🏗️ Für die Dachmontage wird ein Gerüst gestellt. Bitte halten Sie die Fläche rund ums Haus dafür frei.');
+  if(c('sperre'))d.push('🚧 Für den Gerüstaufbau bzw. die Anlieferung ist eine Straßen- bzw. Gehwegsperrung notwendig. Diese wird vorab bei der zuständigen Behörde beantragt – wir halten Sie über den Stand auf dem Laufenden. Bitte beachten Sie, dass sich die Montageplanung dadurch etwas verzögern kann.');
   if(c('beta'))d.push('🧩 Wie bereits mit Ihnen besprochen, kommt bei Ihrer Anlage die Beta-Platte von SL Rack zum Einsatz – ein Universal-Blechziegel, der an den nötigen Stellen anstelle einzelner Original-Dachziegel verbaut wird. Die Aufklärung dazu haben Sie bereits unterschrieben.');
   if(photos.ziegel&&photos.ziegel.length&&!noZiegel)d.push('📷 Zur Orientierung finden Sie unten Fotos Ihrer aktuellen Dacheindeckung. Damit können Sie beim Baustoffhändler bzw. Dachdecker gezielt die passenden Ersatzziegel besorgen.');
   sec('🧱','Dach & Ersatzziegel',d,'ziegel');
