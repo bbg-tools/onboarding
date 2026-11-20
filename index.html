@@ -535,7 +535,8 @@ body.filter-open .hero h2:after{content:" – nur offene Punkte";font-size:20px;
     </select>
     <label class="chk"><input type="checkbox" id="blitz"> Blitzschutzanlage vorhanden</label>
     <label class="chk"><input type="checkbox" id="geruest"> Gerüst wird gestellt</label>
-    <label class="chk"><input type="checkbox" id="sperre"> Straßen-/Gehwegsperrung nötig (z. B. für Gerüst oder Anlieferung)</label>
+    <label class="chk"><input type="checkbox" id="sperre"> Straßen-/Gehwegsperrung für das Gerüst nötig</label>
+    <div class="photo" data-key="geruest" data-label="Gerüst-Planung (welche Seite eingerüstet wird)"></div>
     <div class="photo" data-key="ziegel" data-label="Ziegel (damit der Kunde passende Ersatzziegel besorgen kann)"></div>
   </fieldset>
 
@@ -864,11 +865,11 @@ function build(){
   if(c('blitz')){
     d.push('⚡ Ihre Blitzschutzanlage: Zu allen leitenden Teilen müssen mindestens 50 cm Abstand eingehalten werden – andernfalls muss die Blitzschutzanlage vollständig abgebaut werden (ein teilweiser Umbau ist nicht möglich). Die genaue Vorgehensweise stimme ich mit Ihnen ab; eine Demontage bestätigen Sie mir bitte schriftlich per E-Mail unter Angabe Ihrer Kundennummer.');
   }
-  if(c('geruest'))d.push('🏗️ Für die Dachmontage wird ein Gerüst gestellt. Bitte halten Sie die Fläche rund ums Haus dafür frei.');
-  if(c('sperre'))d.push('🚧 Für den Gerüstaufbau bzw. die Anlieferung ist eine Straßen- bzw. Gehwegsperrung notwendig. Diese wird vorab bei der zuständigen Behörde beantragt – wir halten Sie über den Stand auf dem Laufenden. Bitte beachten Sie, dass sich die Montageplanung dadurch etwas verzögern kann.');
+  if(c('geruest')||photos.geruest.length)d.push('🏗️ Für die Dachmontage wird ein Gerüst gestellt. Bitte halten Sie die Fläche rund ums Haus dafür frei.'+(photos.geruest.length?' Auf '+(photos.geruest.length>1?'den Fotos':'dem Foto')+' unten sehen Sie, an welcher Seite eingerüstet wird und wie das Gerüst geplant ist.':''));
+  if(c('sperre'))d.push('🚧 Für den Gerüstaufbau ist eine Straßen- bzw. Gehwegsperrung notwendig. Diese wird vorab bei der zuständigen Behörde beantragt – wir halten Sie über den Stand auf dem Laufenden. Bitte beachten Sie, dass sich die Montageplanung dadurch etwas verzögern kann.');
   if(c('beta'))d.push('🧩 Wie bereits mit Ihnen besprochen, kommt bei Ihrer Anlage die Beta-Platte von SL Rack zum Einsatz – ein Universal-Blechziegel, der an den nötigen Stellen anstelle einzelner Original-Dachziegel verbaut wird. Die Aufklärung dazu haben Sie bereits unterschrieben.');
   if(photos.ziegel&&photos.ziegel.length&&!noZiegel)d.push('📷 Zur Orientierung finden Sie unten Fotos Ihrer aktuellen Dacheindeckung. Damit können Sie beim Baustoffhändler bzw. Dachdecker gezielt die passenden Ersatzziegel besorgen.');
-  sec('🧱','Dach & Ersatzziegel',d,'ziegel');
+  sec('🧱','Dach & Ersatzziegel',d,['ziegel','geruest']);
 
   // Lieferung
   if(c('h_liefer')){
@@ -985,11 +986,14 @@ function mailHtml(withPhotos=true){
     h+=`<table ${TBL}margin:0 0 16px;border:1px solid ${C.line}">`+
        `<tr><td data-sec="${esc(s.title)}" style="background:${C.grey};padding:10px 16px;border-bottom:1px solid ${C.line};font-size:15px;font-weight:bold;color:${C.text}">${s.icon}&nbsp;&nbsp;${esc(s.title)}</td></tr>`+
        `<tr><td style="padding:14px 16px 4px">`+parasHtml(s.paras);
-    if(withPhotos&&s.photoKey&&photos[s.photoKey].length){
+    const PCAP={ziegel:'Ihre aktuelle Dacheindeckung',geruest:'Geplante Einrüstung'};
+    const pk=[].concat(s.photoKey||[]).filter(k=>photos[k]&&photos[k].length);
+    if(withPhotos)pk.forEach(k=>{
+      if(pk.length>1)h+=`<p style="margin:6px 0 4px;font-size:12.5px;color:${C.muted||'#667085'};font-weight:bold">${PCAP[k]||''}</p>`;
       h+='<p style="margin:2px 0 12px">';
-      photos[s.photoKey].forEach(src=>h+=`<img src="${src}" width="250" style="width:250px;max-width:100%;height:auto;margin:0 6px 6px 0;border:1px solid ${C.line}" alt="Foto">`);
+      photos[k].forEach(src=>h+=`<img src="${src}" width="250" style="width:250px;max-width:100%;height:auto;margin:0 6px 6px 0;border:1px solid ${C.line}" alt="Foto">`);
       h+='</p>';
-    }
+    });
     h+=`</td></tr></table>`;
   });
 
@@ -1017,7 +1021,7 @@ function mailText(){
   t+=`\n${line}\nDIE BESPROCHENEN PUNKTE IM DETAIL\n${line}\n`;
   S.forEach(s=>{
     t+=`\n${s.icon} ${s.title.toUpperCase()}\n`+s.paras.join('\n')+'\n';
-    if(s.photoKey&&photos[s.photoKey].length)t+=`📎 Foto(s) im Anhang\n`;
+    if([].concat(s.photoKey||[]).some(k=>photos[k]&&photos[k].length))t+=`📎 Foto(s) im Anhang\n`;
   });
   t+='\n'+widerspruch()+'\n\n'+fragen()+'\n';
   return t;
@@ -1091,7 +1095,7 @@ $('bOutlook').onclick=async()=>{
   toast('Mail kopiert – im neuen Fenster mit Strg+V einfügen');
 };
 $('bDl').onclick=()=>{
-  const names={ziegel:'Ziegel',aufstellort:'Aufstellort',zaehlerschrank:'Zaehlerschrank',zaehler:'Zaehler',wallbox:'Wallbox',erdarbeiten:'Erdarbeiten'};
+  const names={ziegel:'Ziegel',aufstellort:'Aufstellort',zaehlerschrank:'Zaehlerschrank',zaehler:'Zaehler',wallbox:'Wallbox',erdarbeiten:'Erdarbeiten',geruest:'Geruest'};
   const list=[];Object.keys(photos).forEach(k=>photos[k].forEach((src,i)=>list.push([src,`${names[k]}_${(v('projnr')||v('kname')||'Kunde').replace(/[^\w-]/g,'')}_${i+1}.jpg`])));
   if(!list.length)return toast('Keine Fotos vorhanden');
   list.forEach(([src,name],i)=>setTimeout(()=>{const a=document.createElement('a');a.href=src;a.download=name;document.body.appendChild(a);a.click();a.remove();},i*350));
